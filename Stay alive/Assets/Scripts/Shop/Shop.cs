@@ -32,23 +32,22 @@ public class Shop : MonoBehaviour
     [Header("SelectMap")]
     [SerializeField] private ShopItem[] _maps;
     [SerializeField] private GameUIColor _gameUIColor;
+    [SerializeField] private Wallet _wallet;
+    [SerializeField] private WalletSoundWithUIView _walletView;
     
     private string _statusCheckMap;
     private int _checkMap;
     private int _iMap;
     
-    [Header("Other")]
-    private Wallet _wallet;
     private ShopData _shopData;
     
     private void Start()
     {
-        _wallet = new Wallet();
         _shopData = new ShopData();
+        _walletView.Initialize(_wallet);
         
         if (PlayerPrefs.HasKey("SaveGame"))
             _shopData = JsonUtility.FromJson<ShopData>(PlayerPrefs.GetString("SaveGame"));
-        
         else
             PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
 

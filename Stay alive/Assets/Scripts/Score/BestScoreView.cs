@@ -3,29 +3,36 @@ using UnityEngine.UI;
 
 public class BestScoreView : MonoBehaviour
 {
-    [SerializeField] private Text _bestScoreText;
+    [SerializeField] private Text[] _bestScoreText;
 
     private BestScore _bestScore;
+    private Player _player;
     
-    public void Initialize()
+    public void Initialize(BestScore bestScore, Player player)
     {
-        UpdateView(_bestScore.Record);
+        _bestScore = bestScore;
+        _player = player;
+        _player.Died += OnBestScoreChanged;
+        _bestScore.Changed += SetView;
+        SetView(_bestScore.Record);
     }
 
-    /*private void OnEnable()
+    private void OnDisable()
     {
-        _bestScore.Enable();
-        _bestScore.Changed += UpdateView;
-    }*/
+        _player.Died -= OnBestScoreChanged;
+        _bestScore.Changed -= SetView;
+    }
 
-    /*private void OnDisable()
+    private void OnBestScoreChanged()
     {
-        _bestScore.Disable();
-        _bestScore.Changed -= UpdateView;
-    }*/
+        _bestScore.SetRecord();
+    }
 
-    private void UpdateView(int record)
+    private void SetView(int record)
     {
-        _bestScoreText.text = $"{record}";
+        for (int i = 0; i < _bestScoreText.Length; i++)
+        {
+            _bestScoreText[i].text = $"{record}";
+        }
     }
 }

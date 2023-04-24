@@ -2,46 +2,40 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : MonoBehaviour
+[RequireComponent(typeof(Wallet))]
+public class Player : MonoBehaviour, IMovable
 {
-    [Header("Moving")]
     [SerializeField] private GameObject _mesh;
     
     [SerializeField] private float _timeForMove = 0.35f;
     [SerializeField] private float _jumpHeight = 1.0f;
     
-    [SerializeField] private bool _canMove = true;
     [SerializeField] private bool _isMove;
     
-    [Header("Particle")]
-    [SerializeField] private ParticleSystem _particle;
+    [SerializeField] private ParticleSystem _dieParticle;
     
-    [Header("Audio")]
     [SerializeField] private AudioSource _jumpSound;
     
     private float _elapsedTime;
     private float _startY;
     
-    private Vector3 _current;
-    private Vector3 _target;
+    private Vector3 _currentPosition;
+    private Vector3 _targetPosition;
     
     private Rigidbody _rigidbody;
-    
+
     public event Action Died;
-    
+
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        
-        _current = transform.position;
+
+        _currentPosition = transform.position;
         _startY = transform.position.y;
     }
     
-    private void Update()
+    private void FixedUpdate()
     {
-        if (_canMove)
-            HandleInput();
-        
         if (_isMove)
             MovePlayer();
     }
@@ -50,53 +44,36 @@ public class Player : MonoBehaviour
     {
         if (trigger.TryGetComponent(out Bomb bomb))
         {
-            Instantiate(_particle, transform.position, Quaternion.identity);
-            _mesh.SetActive(false);
-            _canMove = false;
             Died?.Invoke();
+            Instantiate(_dieParticle, transform.position, Quaternion.identity);
+            gameObject.SetActive(false);
         }
     }
 
-    private void HandleInput()
+    public void Move(Vector3 distance)
     {
-        if (SwipeManager.SwipeUp)
-            Move(new Vector3(0, 0, 1.65f));
+        var newPosition = _currentPosition + distance;
         
-        if (SwipeManager.SwipeDown)
-            Move(new Vector3(0, 0, -1.65f));
-        
-        if (SwipeManager.SwipeLeft)
-            Move(new Vector3(-1.65f, 0, 0));
-        
-        if (SwipeManager.SwipeRight)
-            Move(new Vector3(1.65f, 0, 0));
-    }
-
-    private void Move(Vector3 distance)
-    {
-        var newPosition = _current + distance;
-
-        if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f)) 
+        if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f) || _isMove) 
             return;
-
-        _target = newPosition;
+        
+        _targetPosition = newPosition;
         _elapsedTime = 0;
-        _canMove = false;
         _isMove = true;
-        //_jumpSound.Play();
-
+        _jumpSound.Play();
+        
         switch (MoveDirection)
         {
-            case "north":
+            case Direction.North:
                 _mesh.transform.rotation = Quaternion.Euler(0, -90, 0);
                 break;
-            case "south":
+            case Direction.South:
                 _mesh.transform.rotation = Quaternion.Euler(0, 90, 0);
                 break;
-            case "east":
+            case Direction.East:
                 _mesh.transform.rotation = Quaternion.Euler(0, 180, 0);
                 break;
-            case "west":
+            case Direction.West:
                 _mesh.transform.rotation = Quaternion.Euler(0, 0, 0);
                 break;
         }
@@ -104,22 +81,20 @@ public class Player : MonoBehaviour
 
     private void MovePlayer()
     {
-        _elapsedTime += Time.deltaTime;
+        _elapsedTime += Time.fixedDeltaTime;
 
         var weight = (_elapsedTime < _timeForMove) ? (_elapsedTime / _timeForMove) : 1;
-        var x = Lerp(_current.x, _target.x, weight);
-        var z = Lerp(_current.z, _target.z, weight);
-        var y = Sinerp(_current.y, _startY + _jumpHeight, weight);
+        var x = Lerp(_currentPosition.x, _targetPosition.x, weight);
+        var z = Lerp(_currentPosition.z, _targetPosition.z, weight);
+        var y = Sinerp(_currentPosition.y, _startY + _jumpHeight, weight);
 
         var result = new Vector3(x, y, z);
-        transform.position = result;
+        _rigidbody.MovePosition(result);
 
-        if (result == _target)
+        if (result == _targetPosition)
         {
-            _canMove = true;
             _isMove = false;
-            _current = _target;
-            _rigidbody.AddForce(0, -10, 0, ForceMode.VelocityChange);
+            _currentPosition = _targetPosition;
         }
     }
 
@@ -133,28 +108,36 @@ public class Player : MonoBehaviour
         return min + (max - min) * Mathf.Sin(weight * Mathf.PI);
     }
 
-    private string MoveDirection
+    private Enum MoveDirection
     {
         get
         {
             if (_isMove)
             {
-                var dx = _target.x - _current.x;
-                var dz = _target.z - _current.z;
+                var dx = _targetPosition.x - _currentPosition.x;
+                var dz = _targetPosition.z - _currentPosition.z;
                 
                 if (dz > 0)
-                    return "north";
+                    return Direction.North;
                 
                 else if (dz < 0)
-                    return "south";
+                    return Direction.South;
                 
                 else if (dx > 0)
-                    return "west";
+                    return Direction.West;
                 
                 else
-                    return "east";
+                    return Direction.East;
             }
             return null;
         }
     }
+}
+
+public enum Direction
+{
+    North,
+    South,
+    West,
+    East
 }

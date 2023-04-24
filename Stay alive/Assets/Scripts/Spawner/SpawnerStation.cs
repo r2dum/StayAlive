@@ -6,19 +6,23 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher
 {
     [SerializeField] private List<Transform> _spawnBombPositions;
     [SerializeField] private List<Transform> _spawnWarnPositions;
+    [SerializeField] private TriggerBlock[] _triggerBlocks;
 
     private BaseSpawnerState _currentSpawnerState;
     private List<BaseSpawnerState> _allSpawnerStates;
 
+    private CurrentScore _currentScore;
     private IFactory _factory;
     
-    public void Initialize()
+    public void Initialize(IFactory factory, CurrentScore currentScore)
     {
-        _factory = GetComponent<IFactory>();
+        _factory = factory;
         
         _allSpawnerStates = new List<BaseSpawnerState>()
         {
-            new RandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions)
+            new RandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, currentScore),
+            new InvisibleRandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, currentScore),
+            new TriggerSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, currentScore, _triggerBlocks)
         };
         
         _currentSpawnerState = _allSpawnerStates[0];

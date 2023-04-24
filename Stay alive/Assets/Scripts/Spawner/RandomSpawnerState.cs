@@ -3,22 +3,16 @@ using UnityEngine;
 
 public class RandomSpawnerState : BaseSpawnerState
 {
-    [Range(1f, 1.35f)] private float _startSpawn;
-    private float _timeSpawn;
-    private int _randomPosition;
-    
-    private readonly List<Transform> _spawnWarnPositions;
-    
+    [Range(1f, 1.35f)] private float _timeSpawn;
+
     public RandomSpawnerState(IFactory factory, IStationStateSwitcher stateSwitcher, 
-        List<Transform> spawnPositions, List<Transform> spawnWarnPositions) 
-        : base(factory, stateSwitcher, spawnPositions)
+        List<Transform> spawnBombPositions, List<Transform> spawnWarnPositions, CurrentScore currentScore) 
+        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, currentScore)
     {
-        _spawnWarnPositions = spawnWarnPositions;
     }
 
     public override void Start()
     {
-        _timeSpawn = _startSpawn;
         Debug.Log("Random Start");
     }
 
@@ -31,16 +25,19 @@ public class RandomSpawnerState : BaseSpawnerState
     {
         if (RandomTime(0.35f, 1.25f))
         {
-            var position = RandomPosition();
+            if (_currentScore.Score % 15 == 0)
+                _stateSwitcher.SwitchState<TriggerSpawnerState>();
             
-            _factory.Spawn(_spawnPositions[position], GameContentType.Bomb);
+            var position = RandomPosition();
+
+            _factory.Spawn(_spawnBombPositions[position], GameContentType.Bomb);
             _factory.Spawn(_spawnWarnPositions[position], GameContentType.Warn);
         }
     }
     
     private int RandomPosition()
     {
-        return Random.Range(0, _spawnPositions.Count);
+        return Random.Range(0, _spawnBombPositions.Count);
     }
     
     private bool RandomTime(float minTime, float maxTime)

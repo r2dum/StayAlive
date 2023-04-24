@@ -129,9 +129,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26614c40fa9081c4da234c7a63eb0621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _particle: {fileID: 6691073170713797619, guid: 3a7352115c0004b418f5a11f9b7bb764, type: 3}
-  _model: {fileID: 943647167635896311}
+  _particle: {fileID: 6691073170713797617, guid: 3a7352115c0004b418f5a11f9b7bb764, type: 3}
   _destroyPos: -3.8
+  _type: 0
 --- !u!65 &4392455472107055512
 BoxCollider:
   m_ObjectHideFlags: 0

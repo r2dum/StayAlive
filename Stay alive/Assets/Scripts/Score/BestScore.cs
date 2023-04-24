@@ -5,8 +5,8 @@ public class BestScore
 {
     public int Record => PlayerPrefs.GetInt("Record");
     
-    private CurrentScore _currentScore;
-
+    private readonly CurrentScore _currentScore;
+    
     public event Action<int> Changed;
 
     public BestScore(CurrentScore currentScore)
@@ -14,17 +14,7 @@ public class BestScore
         _currentScore = currentScore;
     }
 
-    public void Enable()
-    {
-        //Player.Died += SetRecord;
-    }
-
-    public void Disable()
-    {
-        //Player.Died -= SetRecord;
-    }
-
-    private void SetRecord()
+    public void SetRecord()
     {
         if (_currentScore.Score > Record)
         {

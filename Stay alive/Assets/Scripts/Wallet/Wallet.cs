@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Wallet
+public class Wallet : MonoBehaviour
 {
     public int Coins
     { 
@@ -9,17 +9,17 @@ public class Wallet
         private set => PlayerPrefs.SetInt("Cash", value);
     }
 
-    public event Action CoinsChanged;
+    public event Action<int> CoinsChanged;
 
     public void AddCoin() 
     { 
         Coins++;
-        CoinsChanged?.Invoke();
+        CoinsChanged?.Invoke(Coins);
     }
 
     public void BuyWithCoins(int price)
     { 
         Coins -= price;
-        CoinsChanged?.Invoke();
+        CoinsChanged?.Invoke(Coins);
     }
 }
