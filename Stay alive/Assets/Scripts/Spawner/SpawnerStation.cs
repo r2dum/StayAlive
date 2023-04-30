@@ -2,11 +2,13 @@
 using System.Linq;
 using UnityEngine;
 
-public class SpawnerStation : MonoBehaviour, IStationStateSwitcher
+public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandler
 {
     [SerializeField] private List<Transform> _spawnBombPositions;
     [SerializeField] private List<Transform> _spawnWarnPositions;
     [SerializeField] private TriggerBlock[] _triggerBlocks;
+
+    private bool _isPaused;
 
     private BaseSpawnerState _currentSpawnerState;
     private List<BaseSpawnerState> _allSpawnerStates;
@@ -30,6 +32,9 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher
 
     private void Update()
     {
+        if (_isPaused)
+            return;
+        
         _currentSpawnerState.Spawn();
     }
 
@@ -39,5 +44,10 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher
         _currentSpawnerState.Stop();
         state.Start();
         _currentSpawnerState = state;
+    }
+
+    public void SetPause(bool isPaused)
+    {
+        _isPaused = isPaused;
     }
 }

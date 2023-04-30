@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 
-public class PlayerInput : MonoBehaviour
+public class PlayerInput : MonoBehaviour, IPauseHandler
 {
     private IMovable _movable;
     private IInput _input;
+
+    private bool _isPaused;
 
     public void Initialize(IMovable movable, IInput input)
     {
@@ -14,6 +16,9 @@ public class PlayerInput : MonoBehaviour
 
     private void Update()
     {
+        if (_isPaused)
+            return;
+        
         _input.Update();
     }
 
@@ -30,5 +35,10 @@ public class PlayerInput : MonoBehaviour
         
         if (swipeType == SwipeType.Right)
             _movable.Move(new Vector3(1.65f, 0, 0));
+    }
+
+    public void SetPause(bool isPaused)
+    {
+        _isPaused = isPaused;
     }
 }

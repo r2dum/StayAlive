@@ -14,7 +14,10 @@ public class GameContentFactory : MonoBehaviour, IFactory
 
     private PoolMono<Bomb> _bombsPool;
     private PoolMono<Warn> _warnsPool;
-
+    
+    public event Action<Bomb> BombSpawned;
+    public event Action<Warn> WarnSpawned;
+    
     public void Initialize(BombType bombType)
     {
         _bombsPool = new PoolMono<Bomb>(SetBombType(bombType), _poolCount, _bombsContainer);
@@ -29,9 +32,13 @@ public class GameContentFactory : MonoBehaviour, IFactory
         switch (type)
         {
             case GameContentType.Bomb:
-                return _bombsPool.GetFreeElement(position);
+                var bomb = _bombsPool.GetFreeElement(position);
+                BombSpawned?.Invoke(bomb);
+                return bomb;
             case GameContentType.Warn:
-                return _warnsPool.GetFreeElement(position);
+                var warn = _warnsPool.GetFreeElement(position);
+                WarnSpawned?.Invoke(warn);
+                return warn;
             default:
                 throw new Exception("Invalid product type.");
         }

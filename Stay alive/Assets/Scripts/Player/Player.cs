@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Wallet))]
-public class Player : MonoBehaviour, IMovable
+public class Player : MonoBehaviour, IMovable, IPauseHandler
 {
     [SerializeField] private GameObject _mesh;
     
@@ -19,6 +19,8 @@ public class Player : MonoBehaviour, IMovable
     private float _elapsedTime;
     private float _startY;
     
+    private bool _isPaused;
+    
     private Vector3 _currentPosition;
     private Vector3 _targetPosition;
     
@@ -29,13 +31,17 @@ public class Player : MonoBehaviour, IMovable
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
-
+        _rigidbody.isKinematic = true;
+        
         _currentPosition = transform.position;
         _startY = transform.position.y;
     }
     
-    private void FixedUpdate()
+    private void Update()
     {
+        if (_isPaused)
+            return;
+        
         if (_isMove)
             MovePlayer();
     }
@@ -44,17 +50,18 @@ public class Player : MonoBehaviour, IMovable
     {
         if (trigger.TryGetComponent(out Bomb bomb))
         {
-            Died?.Invoke();
             Instantiate(_dieParticle, transform.position, Quaternion.identity);
             gameObject.SetActive(false);
+            Died?.Invoke();
         }
     }
-
+    
     public void Move(Vector3 distance)
     {
         var newPosition = _currentPosition + distance;
         
-        if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f) || _isMove) 
+        if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f) || 
+            _isMove || _isPaused) 
             return;
         
         _targetPosition = newPosition;
@@ -81,7 +88,7 @@ public class Player : MonoBehaviour, IMovable
 
     private void MovePlayer()
     {
-        _elapsedTime += Time.fixedDeltaTime;
+        _elapsedTime += Time.deltaTime;
 
         var weight = (_elapsedTime < _timeForMove) ? (_elapsedTime / _timeForMove) : 1;
         var x = Lerp(_currentPosition.x, _targetPosition.x, weight);
@@ -89,7 +96,7 @@ public class Player : MonoBehaviour, IMovable
         var y = Sinerp(_currentPosition.y, _startY + _jumpHeight, weight);
 
         var result = new Vector3(x, y, z);
-        _rigidbody.MovePosition(result);
+        transform.position = result;
 
         if (result == _targetPosition)
         {
@@ -97,7 +104,7 @@ public class Player : MonoBehaviour, IMovable
             _currentPosition = _targetPosition;
         }
     }
-
+    
     private float Lerp(float min, float max, float weight)
     {
         return min + (max - min) * weight;
@@ -131,6 +138,11 @@ public class Player : MonoBehaviour, IMovable
             }
             return null;
         }
+    }
+
+    public void SetPause(bool isPaused)
+    {
+        _isPaused = isPaused;
     }
 }
 

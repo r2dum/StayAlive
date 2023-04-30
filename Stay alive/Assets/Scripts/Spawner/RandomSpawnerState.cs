@@ -25,8 +25,8 @@ public class RandomSpawnerState : BaseSpawnerState
     {
         if (RandomTime(0.35f, 1.25f))
         {
-            if (_currentScore.Score % 15 == 0)
-                _stateSwitcher.SwitchState<TriggerSpawnerState>();
+            if (_currentScore.Score % 15 == 0 && _currentScore.Score != 0)
+                _stateSwitcher.SwitchState<InvisibleRandomSpawnerState>();
             
             var position = RandomPosition();
 
@@ -35,12 +35,7 @@ public class RandomSpawnerState : BaseSpawnerState
         }
     }
     
-    private int RandomPosition()
-    {
-        return Random.Range(0, _spawnBombPositions.Count);
-    }
-    
-    private bool RandomTime(float minTime, float maxTime)
+    protected bool RandomTime(float minTime, float maxTime)
     {
         if (_timeSpawn <= 0f)
         {
@@ -50,5 +45,10 @@ public class RandomSpawnerState : BaseSpawnerState
 
         _timeSpawn -= Time.deltaTime;
         return false;
+    }
+    
+    private int RandomPosition()
+    {
+        return Random.Range(0, _spawnBombPositions.Count);
     }
 }

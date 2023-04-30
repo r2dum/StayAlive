@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class BestScore
 {
-    public int Record => PlayerPrefs.GetInt("Record");
+    private const string RECORDKEY = "Record";
     
     private readonly CurrentScore _currentScore;
+    public int Record => PlayerPrefs.GetInt(RECORDKEY);
     
     public event Action<int> Changed;
 
@@ -18,7 +19,7 @@ public class BestScore
     {
         if (_currentScore.Score > Record)
         {
-            PlayerPrefs.SetInt("Record", _currentScore.Score);
+            PlayerPrefs.SetInt(RECORDKEY, _currentScore.Score);
             Changed?.Invoke(_currentScore.Score);
         }
     }

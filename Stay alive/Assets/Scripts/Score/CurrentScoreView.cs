@@ -6,25 +6,28 @@ public class CurrentScoreView : MonoBehaviour
     [SerializeField] private Text _currentScoreText;
     
     private CurrentScore _currentScore;
-
-    public void Initialize(CurrentScore currentScore)
+    private BombsHandler _bombsHandler;
+    
+    public void Initialize(CurrentScore currentScore, BombsHandler bombsHandler)
     {
         _currentScore = currentScore;
-        Bomb.Dropped += OnScoreChanged;
+        _bombsHandler = bombsHandler;
+        
+        _bombsHandler.BombDropped += OnBombDropped;
         _currentScore.ScoreChanged += SetView;
     }
-
+    
     public void OnDisable()
     {
-        Bomb.Dropped -= OnScoreChanged;
+        _bombsHandler.BombDropped -= OnBombDropped;
         _currentScore.ScoreChanged -= SetView;
     }
-
-    private void OnScoreChanged()
+    
+    private void OnBombDropped(Bomb bomb)
     {
         _currentScore.AddScore();
     }
-
+    
     private void SetView(int score)
     { 
         _currentScoreText.text = $"{score}";

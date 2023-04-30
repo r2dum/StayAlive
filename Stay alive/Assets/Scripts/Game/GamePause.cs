@@ -7,18 +7,29 @@ public class GamePause : MonoBehaviour
     [SerializeField] private PausePanel _pausePanel;
     [SerializeField] private LosePanel _losePanel;
     [SerializeField] private Button _pauseButton;
+    [SerializeField] private Button _resumeButton;
     [SerializeField] private Text _pauseTimerText;
-
-    private WaitForSecondsRealtime _delay = new WaitForSecondsRealtime(1f);
     
-    public void Pause()
+    private readonly WaitForSecondsRealtime _delay = 
+        new WaitForSecondsRealtime(1f);
+    
+    private PauseHandler _pauseHandler;
+    
+    public void Initialize(PauseHandler pauseHandler)
+    {
+        _pauseHandler = pauseHandler;
+        _pauseButton.onClick.AddListener(OnPauseButtonClicked);
+        _resumeButton.onClick.AddListener(OnResumeButtonClicked);
+    }
+    
+    private void OnPauseButtonClicked()
     {
         _pausePanel.Show();
         _pauseButton.gameObject.SetActive(false);
-        Time.timeScale = 0f;
+        SetPause(true);
     }
     
-    public void Resume()
+    private void OnResumeButtonClicked()
     {
         StartCoroutine(ResumeWithTimer());
     }
@@ -35,15 +46,17 @@ public class GamePause : MonoBehaviour
         yield return _delay;
         _pauseTimerText.gameObject.SetActive(false);
         _pauseButton.gameObject.SetActive(true);
-        Time.timeScale = 1f;
+        SetPause(false);
     }
     
-    private void OnApplicationPause(bool pause)
+    private void OnApplicationPause(bool isPaused)
     {
-        if (pause)
-        {
-            if (_losePanel.gameObject.activeInHierarchy == false)
-                Pause();
-        }
+        if (isPaused && _losePanel.gameObject.activeInHierarchy == false)
+            OnPauseButtonClicked();
+    }
+    
+    private void SetPause(bool isPaused)
+    {
+        _pauseHandler.SetPause(isPaused);
     }
 }
