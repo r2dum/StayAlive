@@ -7,12 +7,14 @@ public class Game : MonoBehaviour
     [SerializeField] private Map[] _mapPrefabs;
     [SerializeField] private GameUIColor _gameUIColor;
     [SerializeField] private GameLose _gameLose;
+    [SerializeField] private GamePause _gamePause;
     [SerializeField] private GameContentFactory _gameContentFactory;
     [SerializeField] private SpawnerStation _spawnerStation;
     [SerializeField] private WalletSoundWithUIView _walletView;
     [SerializeField] private CurrentScoreView _currentScoreView;
     [SerializeField] private BestScoreView _bestScoreView;
-    [SerializeField] private GamePause _gamePause;
+    [SerializeField] private Canvas _gameCanvas;
+    [SerializeField] private int _gameFps;
     
     private Player _player;
     private Map _map;
@@ -23,12 +25,15 @@ public class Game : MonoBehaviour
     private BombsHandler _bombsHandler;
     private WarnsHandler _warnsHandler;
     private PauseHandler _pauseHandler;
+    private JsonSaveSystem _jsonSaveSystem;
+    private PlayerPrefsSystem _playerPrefsSystem;
     
-    private void Awake()
+    public void Initialize(SceneLoader sceneLoader)
     {
-        SetGameFps(120);
-        PauseHandler();
+        SetGameFps(_gameFps);
+        SaveSystems();
         ShopData();
+        PauseHandler();
         LoadPlayer();
         Wallet();
         Input();
@@ -39,7 +44,15 @@ public class Game : MonoBehaviour
         SpawnerStation();
         BombsHandler();
         WarnsHandler();
-        View();
+        View(sceneLoader);
+        SetPause(true);
+    }
+    
+    public void BeginGame()
+    {
+        _map.DestroyPlayButton();
+        _gameCanvas.enabled = true;
+        SetPause(false);
     }
     
     private void SetGameFps(int fps)
@@ -47,16 +60,29 @@ public class Game : MonoBehaviour
         Application.targetFrameRate = fps;
     }
     
+    private void SaveSystems()
+    {
+        _jsonSaveSystem = new JsonSaveSystem();
+        _playerPrefsSystem = new PlayerPrefsSystem();
+    }
+    
     private void ShopData()
     {
         _shopData = new ShopData();
-
-        if (PlayerPrefs.HasKey("SaveGame"))
-            _shopData = JsonUtility.FromJson<ShopData>(PlayerPrefs.GetString("SaveGame"));
-        else
-            PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
+        _shopData = _jsonSaveSystem.Load(_shopData);
     }
-
+    
+    private void PauseHandler()
+    {
+        _pauseHandler = new PauseHandler();
+        _gamePause.Initialize(_pauseHandler);
+    }
+    
+    private void SetPause(bool isPaused)
+    {
+        _pauseHandler.SetPause(isPaused);
+    }
+    
     private void LoadPlayer()
     {
         foreach (var playerPrefab in _playerPrefabs)
@@ -85,8 +111,9 @@ public class Game : MonoBehaviour
     private void Wallet()
     {
         _wallet = _player.GetComponent<Wallet>();
+        _wallet.Initialize(_playerPrefsSystem);
     }
-
+    
     private void Input()
     {
         if (SystemInfo.deviceType == DeviceType.Handheld)
@@ -110,17 +137,12 @@ public class Game : MonoBehaviour
 
     private void BestScore()
     {
-        _bestScore = new BestScore(_currentScore);
+        _bestScore = new BestScore(_currentScore, _playerPrefsSystem);
     }
     
     private void GameContentFactory()
     {
         _gameContentFactory.Initialize(_map.BombType);
-    }
-    
-    private void PauseHandler()
-    {
-        _pauseHandler = new PauseHandler();
     }
     
     private void SpawnerStation()
@@ -141,13 +163,13 @@ public class Game : MonoBehaviour
         _pauseHandler.AddToPauseList(_warnsHandler);
     }
     
-    private void View()
+    private void View(SceneLoader sceneLoader)
     {
-        _gamePause.Initialize(_pauseHandler);
         _gameUIColor.Initialize(_map.Color);
         _walletView.Initialize(_wallet);
         _currentScoreView.Initialize(_currentScore, _bombsHandler);
-        _bestScoreView.Initialize(_bestScore, _player);
-        _gameLose.Initialize(_player);
+        _bestScoreView.Initialize(_bestScore);
+        _gameLose.Initialize(_player, _wallet, _bestScore, 
+            _playerPrefsSystem, _currentScoreView, sceneLoader);
     }
 }

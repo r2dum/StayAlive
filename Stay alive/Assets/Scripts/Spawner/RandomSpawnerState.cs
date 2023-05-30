@@ -25,13 +25,16 @@ public class RandomSpawnerState : BaseSpawnerState
     {
         if (RandomTime(0.35f, 1.25f))
         {
-            if (_currentScore.Score % 15 == 0 && _currentScore.Score != 0)
-                _stateSwitcher.SwitchState<InvisibleRandomSpawnerState>();
-            
             var position = RandomPosition();
 
             _factory.Spawn(_spawnBombPositions[position], GameContentType.Bomb);
             _factory.Spawn(_spawnWarnPositions[position], GameContentType.Warn);
+            
+            if (_currentScore.Amount == 0)
+                return;
+            
+            if (_currentScore.Amount % 15 == 0)
+                _stateSwitcher.SwitchState<InvisibleRandomSpawnerState>();
         }
     }
     

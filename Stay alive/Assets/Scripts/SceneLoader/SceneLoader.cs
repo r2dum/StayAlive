@@ -1,20 +1,31 @@
-using UnityEngine;
+using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
-public class SceneLoader : MonoBehaviour
+public class SceneLoader
 {
-    private const string GAME = "Game";
-    private const string SHOP = "Shop";
-    
-    public void Game()
+    public void Menu()
     {
-        SceneManager.LoadScene(GAME);
-        Time.timeScale = 1f;
+        SceneManager.LoadScene(Constants.Scene.GAME);
     }
-
+    
+    public async Task RestartGame()
+    {
+        var loadScene = SceneManager.LoadSceneAsync(Constants.Scene.GAME, LoadSceneMode.Single);
+        
+        while (loadScene.isDone == false)
+        {
+            await Task.Delay(1);
+        }
+        
+        var scene = SceneManager.GetSceneByName(Constants.Scene.GAME);
+        var mainMenu = scene.GetRoot<MainMenu>();
+        var game = scene.GetRoot<Game>();
+        mainMenu.Disable();
+        game.BeginGame();
+    }
+    
     public void Shop()
     {
-        SceneManager.LoadScene(SHOP);
-        Time.timeScale = 1f;
+        SceneManager.LoadScene(Constants.Scene.SHOP);
     }
 }

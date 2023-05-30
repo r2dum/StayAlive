@@ -38,12 +38,11 @@ public class GamePause : MonoBehaviour
     {
         _pausePanel.Hide();
         _pauseTimerText.gameObject.SetActive(true);
-        _pauseTimerText.text = "3";
-        yield return _delay;
-        _pauseTimerText.text = "2";
-        yield return _delay;
-        _pauseTimerText.text = "1";
-        yield return _delay;
+        for (int i = 3; i >= 1; i--)
+        {
+            _pauseTimerText.text = $"{i}";
+            yield return _delay;
+        }
         _pauseTimerText.gameObject.SetActive(false);
         _pauseButton.gameObject.SetActive(true);
         SetPause(false);

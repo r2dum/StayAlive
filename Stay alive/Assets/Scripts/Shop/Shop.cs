@@ -1,354 +1,329 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Shop : MonoBehaviour
 {
-    [Header("Characters Shop UI")]
-    [SerializeField] private GameObject _arrowToLeftPlayer;
-    [SerializeField] private GameObject _arrowToRightPlayer;
-    [SerializeField] private GameObject _buttonBuyPlayer;
-    [SerializeField] private GameObject _buttonSelectPlayer;
-    [SerializeField] private GameObject _textSelectPlayer;
-    [SerializeField] private GameObject _skinMenu;
-    [SerializeField] private Text _priceTextPlayer;
-    
-    [Header("SelectCharacters")]
+    [Header("Players Shop UI")]
+    [SerializeField] private Button _arrowToLeftPlayer;
+    [SerializeField] private Button _arrowToRightPlayer;
+    [SerializeField] private Button _buttonBuyPlayer;
+    [SerializeField] private Button _buttonSelectPlayer;
+    [SerializeField] private Text _selectedPlayerText;
+    [SerializeField] private Text _pricePlayerText;
+    [SerializeField] private Canvas _playersCanvas;
     [SerializeField] private ShopItem[] _players;
-
-    private string _statusCheck;
-    private int _check;
-    private int _iPlayer;
+    private int _player;
     
-    [Header("Map shop UI")]
-    [SerializeField] private GameObject _arrowToLeftMap;
-    [SerializeField] private GameObject _arrowToRightMap;
-    [SerializeField] private GameObject _buttonBuyMap;
-    [SerializeField] private GameObject _buttonSelectMap;
-    [SerializeField] private GameObject _textSelectMap;
-    [SerializeField] private GameObject _mapMenu;
-    [SerializeField] private Text _priceTextMap;
-    
-    [Header("SelectMap")]
+    [Header("Maps Shop UI")]
+    [SerializeField] private Button _arrowToLeftMap;
+    [SerializeField] private Button _arrowToRightMap;
+    [SerializeField] private Button _buttonBuyMap;
+    [SerializeField] private Button _buttonSelectMap;
+    [SerializeField] private Text _selectedMapText;
+    [SerializeField] private Text _priceMapText;
+    [SerializeField] private Canvas _mapsCanvas;
     [SerializeField] private ShopItem[] _maps;
+    private int _map;
+    
+    [Header("Global Shop UI")]
+    [SerializeField] private Button _playersCanvasButton;
+    [SerializeField] private Button _mapsCanvasButton;
+    [SerializeField] private Button _exitShopButton;
+    
     [SerializeField] private GameUIColor _gameUIColor;
     [SerializeField] private Wallet _wallet;
     [SerializeField] private WalletSoundWithUIView _walletView;
     
-    private string _statusCheckMap;
-    private int _checkMap;
-    private int _iMap;
-    
     private ShopData _shopData;
+    private JsonSaveSystem _jsonSaveSystem;
+    private PlayerPrefsSystem _playerPrefsSystem;
+    private SceneLoader _sceneLoader;
     
     private void Start()
     {
         _shopData = new ShopData();
+        _sceneLoader = new SceneLoader();
+        _jsonSaveSystem = new JsonSaveSystem();
+        _playerPrefsSystem = new PlayerPrefsSystem();
+        
+        _shopData = _jsonSaveSystem.Load(_shopData);
+        _wallet.Initialize(_playerPrefsSystem);
         _walletView.Initialize(_wallet);
         
-        if (PlayerPrefs.HasKey("SaveGame"))
-            _shopData = JsonUtility.FromJson<ShopData>(PlayerPrefs.GetString("SaveGame"));
-        else
-            PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
+        PlayersCanvas();
+        MapsCanvas();
+        GlobalCanvas();
+    }
+    
+    private void LoadPlayer()
+    {
+        while (_players[_player].name != _shopData.CurrentPlayer)
+            _player++;
 
-        // CHARACTERS
-        StartCoroutine(LoadCharacter());
+        _players[_player].gameObject.SetActive(true);
+    }
+    
+    private void LoadMap()
+    {
+        while (_maps[_map].name != _shopData.CurrentMap)
+            _map++;
+
+        _maps[_map].gameObject.SetActive(true);
+        _gameUIColor.Initialize(_maps[_map].GetComponent<Map>().Color);
+    }
+    
+    private void PlayersCanvas()
+    {
+        LoadPlayer();
         
-        if (_shopData.CurrentPlayer == _players[_iPlayer].name)
-        {
-            _buttonBuyPlayer.SetActive(false);
-            _buttonSelectPlayer.SetActive(false);
-            _textSelectPlayer.SetActive(true);
-        }
-        else if (_shopData.CurrentPlayer != _players[_iPlayer].name)
-            StartCoroutine(CheckHaveCharacter());
+        if (_shopData.CurrentPlayer == _players[_player].name)
+            SelectedPlayer();
+        else if (_shopData.CurrentPlayer != _players[_player].name)
+            CheckHavePlayer();
 
-        if (_iPlayer >= 0)
-            _arrowToRightPlayer.SetActive(true);
+        _arrowToLeftPlayer.onClick.AddListener(ArrowLeft);
+        _arrowToRightPlayer.onClick.AddListener(ArrowRight);
+        _buttonBuyPlayer.onClick.AddListener(BuyPlayer);
+        _buttonSelectPlayer.onClick.AddListener(SelectPlayer);
 
-        if (_iPlayer > 0)
-            _arrowToLeftPlayer.SetActive(true);
+        if (_player >= 0)
+            _arrowToRightPlayer.gameObject.SetActive(true);
 
-        if (_iPlayer + 1 == _players.Length)
-            _arrowToRightPlayer.SetActive(false);
+        if (_player > 0)
+            _arrowToLeftPlayer.gameObject.SetActive(true);
+
+        if (_player + 1 == _players.Length)
+            _arrowToRightPlayer.gameObject.SetActive(false);
+    }
+    
+    private void MapsCanvas()
+    {
+        LoadMap();
         
-
-        //MAPS
-        StartCoroutine(LoadMap());
+        if (_shopData.CurrentMap == _maps[_map].name)
+            SelectedMap();
         
-        if (_shopData.CurrentMap == _maps[_iMap].name)
-        {
-            _buttonBuyMap.SetActive(false);
-            _buttonSelectMap.SetActive(false);
-            _textSelectMap.SetActive(true);
-        }
-        else if (_shopData.CurrentMap != _maps[_iMap].name)
-            StartCoroutine(CheckHaveMap());
+        else if (_shopData.CurrentMap != _maps[_map].name)
+            CheckHaveMap();
+
+        _arrowToLeftMap.onClick.AddListener(ArrowLeftMap);
+        _arrowToRightMap.onClick.AddListener(ArrowRightMap);
+        _buttonBuyMap.onClick.AddListener(BuyMap);
+        _buttonSelectMap.onClick.AddListener(SelectMap);
         
-        if (_iMap >= 0)
-            _arrowToRightMap.SetActive(true);
+        if (_map >= 0)
+            _arrowToRightMap.gameObject.SetActive(true);
 
-        if (_iMap > 0)
-            _arrowToLeftMap.SetActive(true);
+        if (_map > 0)
+            _arrowToLeftMap.gameObject.SetActive(true);
 
-        if (_iMap + 1 == _maps.Length)
-            _arrowToRightMap.SetActive(false);
+        if (_map + 1 == _maps.Length)
+            _arrowToRightMap.gameObject.SetActive(false);
     }
 
-    private IEnumerator LoadCharacter()
+    private void GlobalCanvas()
     {
-        _iPlayer = 0;
-
-        while (_players[_iPlayer].name != _shopData.CurrentPlayer)
-            _iPlayer++;
-
-        _players[_iPlayer].gameObject.SetActive(true);
-
-        yield return null;
+        _playersCanvasButton.onClick.AddListener(OnPlayersMenuButtonClicked);
+        _mapsCanvasButton.onClick.AddListener(OnMapsMenuButtonClicked);
+        _exitShopButton.onClick.AddListener(OnExitShopButtonClicked);
     }
-
-    private IEnumerator LoadMap()
+    
+    private void CheckHavePlayer()
     {
-        _iMap = 0;
-
-        while (_maps[_iMap].name != _shopData.CurrentMap)
-            _iMap++;
-
-        _maps[_iMap].gameObject.SetActive(true);
-        _gameUIColor.Initialize(_maps[_iMap].GetComponent<Map>().Color);
-
-        yield return null;
-    }
-
-    public IEnumerator CheckHaveCharacter()
-    {
-        while(_statusCheck != "Check")
+        for (int i = 0; i < _shopData.HavePlayers.Count; i++)
         {
-            if (_shopData.HavePlayers.Count != _check)
+            if (_players[_player].name == _shopData.HavePlayers[i])
             {
-                if (_players[_iPlayer].name != _shopData.HavePlayers[_check])
-                {
-                    _check++;
-                }
-                else if (_players[_iPlayer].name == _shopData.HavePlayers[_check])
-                {
-                    _textSelectPlayer.SetActive(false);
-                    _buttonBuyPlayer.SetActive(false);
-                    _buttonSelectPlayer.SetActive(true);
-                    _check = 0;
-                    _statusCheck = "Check";
-                }
-            }
-            else if (_shopData.HavePlayers.Count == _check)
-            {
-                _buttonSelectPlayer.SetActive(false);
-                _textSelectPlayer.SetActive(false);
-                _buttonBuyPlayer.SetActive(true);
-                _priceTextPlayer.text = _players[_iPlayer].Price.ToString();
-                _check = 0;
-                _statusCheck = "Check";
+                _selectedPlayerText.gameObject.SetActive(false);
+                _buttonBuyPlayer.gameObject.SetActive(false);
+                _buttonSelectPlayer.gameObject.SetActive(true);
+                return;
             }
         }
-
-        _statusCheck = "";
-
-        yield return null;
+        
+        _buttonSelectPlayer.gameObject.SetActive(false);
+        _selectedPlayerText.gameObject.SetActive(false);
+        _buttonBuyPlayer.gameObject.SetActive(true);
+        _pricePlayerText.text = $"{_players[_player].Price}";
     }
-
-    public IEnumerator CheckHaveMap()
+    
+    private void CheckHaveMap()
     {
-        while (_statusCheckMap != "CheckMap")
+        for (int i = 0; i < _shopData.HaveMaps.Count; i++)
         {
-            if (_shopData.HaveMaps.Count != _checkMap)
+            if (_maps[_map].name == _shopData.HaveMaps[i])
             {
-                if (_maps[_iMap].name != _shopData.HaveMaps[_checkMap])
-                {
-                    _checkMap++;
-                }
-                else if (_maps[_iMap].name == _shopData.HaveMaps[_checkMap])
-                {
-                    _textSelectMap.SetActive(false);
-                    _buttonBuyMap.SetActive(false);
-                    _buttonSelectMap.SetActive(true);
-                    _checkMap = 0;
-                    _statusCheckMap = "CheckMap";
-                }
-            }
-            else if (_shopData.HaveMaps.Count == _checkMap)
-            {
-                _buttonSelectMap.SetActive(false);
-                _textSelectMap.SetActive(false);
-                _buttonBuyMap.SetActive(true);
-                _priceTextMap.text = _maps[_iMap].Price.ToString();
-                _checkMap = 0;
-                _statusCheckMap = "CheckMap";
+                _selectedMapText.gameObject.SetActive(false);
+                _buttonBuyMap.gameObject.SetActive(false);
+                _buttonSelectMap.gameObject.SetActive(true);
+                return;
             }
         }
-
-        _statusCheckMap = "";
-
-        yield return null;
+        
+        _buttonSelectMap.gameObject.SetActive(false);
+        _selectedMapText.gameObject.SetActive(false);
+        _buttonBuyMap.gameObject.SetActive(true);
+        _priceMapText.text = $"{_maps[_map].Price}";
     }
-
-    public void ArrowRight()
+    
+    private void ArrowRight()
     {
-        if (_iPlayer < _players.Length)
+        if (_player < _players.Length)
         {
-            if (_iPlayer == 0)
-                _arrowToLeftPlayer.SetActive(true);
+            if (_player == 0)
+                _arrowToLeftPlayer.gameObject.SetActive(true);
 
-            _players[_iPlayer].gameObject.SetActive(false);
-            _iPlayer++;
-            _players[_iPlayer].gameObject.SetActive(true);
+            _players[_player].gameObject.SetActive(false);
+            _player++;
+            _players[_player].gameObject.SetActive(true);
 
-            if (_shopData.CurrentPlayer == _players[_iPlayer].name)
-            {
-                _buttonBuyPlayer.SetActive(false);
-                _buttonSelectPlayer.SetActive(false);
-                _textSelectPlayer.SetActive(true);
-            }
-            else if (_shopData.CurrentPlayer != _players[_iPlayer].name)
-                StartCoroutine(CheckHaveCharacter());
+            if (_shopData.CurrentPlayer == _players[_player].name)
+                SelectedPlayer();
+            
+            else if (_shopData.CurrentPlayer != _players[_player].name)
+                CheckHavePlayer();
 
-            if (_iPlayer + 1 == _players.Length)
-                _arrowToRightPlayer.SetActive(false);
+            if (_player + 1 == _players.Length)
+                _arrowToRightPlayer.gameObject.SetActive(false);
         }
     }
 
-    public void ArrowLeft()
+    private void ArrowLeft()
     {
-        if (_iPlayer < _players.Length)
+        if (_player < _players.Length)
         {
-            _players[_iPlayer].gameObject.SetActive(false);
-            _iPlayer--;
-            _players[_iPlayer].gameObject.SetActive(true);
-            _arrowToRightPlayer.SetActive(true);
+            _players[_player].gameObject.SetActive(false);
+            _player--;
+            _players[_player].gameObject.SetActive(true);
+            _arrowToRightPlayer.gameObject.SetActive(true);
 
-            if (_shopData.CurrentPlayer == _players[_iPlayer].name)
-            {
-                _buttonBuyPlayer.SetActive(false);
-                _buttonSelectPlayer.SetActive(false);
-                _textSelectPlayer.SetActive(true);
-            }
-            else if (_shopData.CurrentPlayer != _players[_iPlayer].name)
-                StartCoroutine(CheckHaveCharacter());
+            if (_shopData.CurrentPlayer == _players[_player].name)
+                SelectedPlayer();
 
-            if (_iPlayer == 0)
-                _arrowToLeftPlayer.SetActive(false);
+            else if (_shopData.CurrentPlayer != _players[_player].name)
+                CheckHavePlayer();
+
+            if (_player == 0)
+                _arrowToLeftPlayer.gameObject.SetActive(false);
+        }
+    }
+    
+    private void ArrowRightMap()
+    {
+        if (_map < _maps.Length)
+        {
+            if (_map == 0)
+                _arrowToLeftMap.gameObject.SetActive(true);
+
+            _maps[_map].gameObject.SetActive(false);
+            _map++;
+            _maps[_map].gameObject.SetActive(true);
+            _gameUIColor.Initialize(_maps[_map].GetComponent<Map>().Color);
+
+            if (_shopData.CurrentMap == _maps[_map].name)
+                SelectedMap();
+                
+            else if (_shopData.CurrentMap != _maps[_map].name)
+                CheckHaveMap();
+
+            if (_map + 1 == _maps.Length)
+                _arrowToRightMap.gameObject.SetActive(false);
         }
     }
 
-    public void ArrowRightMap()
+    private void ArrowLeftMap()
     {
-        if (_iMap < _maps.Length)
+        if (_map < _maps.Length)
         {
-            if (_iMap == 0)
-                _arrowToLeftMap.SetActive(true);
+            _maps[_map].gameObject.SetActive(false);
+            _map--;
+            _maps[_map].gameObject.SetActive(true);
+            _arrowToRightMap.gameObject.SetActive(true);
+            _gameUIColor.Initialize(_maps[_map].GetComponent<Map>().Color);
 
-            _maps[_iMap].gameObject.SetActive(false);
-            _iMap++;
-            _maps[_iMap].gameObject.SetActive(true);
-            _gameUIColor.Initialize(_maps[_iMap].GetComponent<Map>().Color);
+            if (_shopData.CurrentMap == _maps[_map].name)
+                SelectedMap();
+            
+            else if (_shopData.CurrentMap != _maps[_map].name)
+                CheckHaveMap();
 
-            if (_shopData.CurrentMap == _maps[_iMap].name)
-            {
-                _buttonBuyMap.SetActive(false);
-                _buttonSelectMap.SetActive(false);
-                _textSelectMap.SetActive(true);
-            }
-            else if (_shopData.CurrentMap != _maps[_iMap].name)
-                StartCoroutine(CheckHaveMap());
-
-            if (_iMap + 1 == _maps.Length)
-                _arrowToRightMap.SetActive(false);
+            if (_map == 0)
+                _arrowToLeftMap.gameObject.SetActive(false);
         }
     }
 
-    public void ArrowLeftMap()
+    private void SelectPlayer()
     {
-        if (_iMap < _maps.Length)
+        _shopData.CurrentPlayer = _players[_player].name;
+        _jsonSaveSystem.Save(_shopData);
+
+        _buttonSelectPlayer.gameObject.SetActive(false);
+        _selectedPlayerText.gameObject.SetActive(true);
+    }
+
+    private void BuyPlayer()
+    {
+        if (_wallet.Coins >= _players[_player].Price)
         {
-            _maps[_iMap].gameObject.SetActive(false);
-            _iMap--;
-            _maps[_iMap].gameObject.SetActive(true);
-            _arrowToRightMap.SetActive(true);
-            _gameUIColor.Initialize(_maps[_iMap].GetComponent<Map>().Color);
+            _wallet.BuyForCoins(_players[_player].Price);
+            _shopData.HavePlayers.Add(_players[_player].name);
+            _jsonSaveSystem.Save(_shopData);
 
-            if (_shopData.CurrentMap == _maps[_iMap].name)
-            {
-                _buttonBuyMap.SetActive(false);
-                _buttonSelectMap.SetActive(false);
-                _textSelectMap.SetActive(true);
-            }
-            else if (_shopData.CurrentMap != _maps[_iMap].name)
-                StartCoroutine(CheckHaveMap());
-
-            if (_iMap == 0)
-                _arrowToLeftMap.SetActive(false);
+            _buttonBuyPlayer.gameObject.SetActive(false);
+            _buttonSelectPlayer.gameObject.SetActive(true);
         }
     }
 
-    public void SelectCharacter()
+    private void SelectMap()
     {
-        _shopData.CurrentPlayer = _players[_iPlayer].name;
+        _shopData.CurrentMap = _maps[_map].name;
+        _jsonSaveSystem.Save(_shopData);
 
-        PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
-
-        _buttonSelectPlayer.SetActive(false);
-        _textSelectPlayer.SetActive(true);
+        _buttonSelectMap.gameObject.SetActive(false);
+        _selectedMapText.gameObject.SetActive(true);
     }
 
-    public void BuyCharacter()
+    private void BuyMap()
     {
-        if (_wallet.Coins >= _players[_iPlayer].Price)
+        if (_wallet.Coins >= _maps[_map].Price)
         {
-            _shopData = JsonUtility.FromJson<ShopData>(PlayerPrefs.GetString("SaveGame"));
+            _wallet.BuyForCoins(_maps[_map].Price);
+            _shopData.HaveMaps.Add(_maps[_map].name);
+            _jsonSaveSystem.Save(_shopData);
 
-            _wallet.BuyWithCoins(_players[_iPlayer].Price);
-            _shopData.HavePlayers.Add(_players[_iPlayer].name);
-
-            PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
-
-            _buttonBuyPlayer.SetActive(false);
-            _buttonSelectPlayer.SetActive(true);
+            _buttonBuyMap.gameObject.SetActive(false);
+            _buttonSelectMap.gameObject.SetActive(true);
         }
     }
-
-    public void SelectMap()
+    
+    private void SelectedPlayer()
     {
-        _shopData.CurrentMap = _maps[_iMap].name;
-
-        PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
-
-        _buttonSelectMap.SetActive(false);
-        _textSelectMap.SetActive(true);
+        _buttonBuyPlayer.gameObject.SetActive(false);
+        _buttonSelectPlayer.gameObject.SetActive(false);
+        _selectedPlayerText.gameObject.SetActive(true);
     }
 
-    public void BuyMap()
+    private void SelectedMap()
     {
-        if (_wallet.Coins >= _maps[_iMap].Price)
-        {
-            _shopData = JsonUtility.FromJson<ShopData>(PlayerPrefs.GetString("SaveGame"));
-
-            _wallet.BuyWithCoins(_maps[_iMap].Price);
-            _shopData.HaveMaps.Add(_maps[_iMap].name);
-
-            PlayerPrefs.SetString("SaveGame", JsonUtility.ToJson(_shopData));
-
-            _buttonBuyMap.SetActive(false);
-            _buttonSelectMap.SetActive(true);
-        }
+        _buttonBuyMap.gameObject.SetActive(false);
+        _buttonSelectMap.gameObject.SetActive(false);
+        _selectedMapText.gameObject.SetActive(true);
     }
-
-    public void Skin()
+    
+    private void OnPlayersMenuButtonClicked()
     {
-        _skinMenu.SetActive(true);
-        _mapMenu.SetActive(false);
+        _playersCanvas.enabled = true;
+        _mapsCanvas.enabled = false;
     }
-
-    public void Map()
+    
+    private void OnMapsMenuButtonClicked()
     {
-        _skinMenu.SetActive(false);
-        _mapMenu.SetActive(true);
+        _playersCanvas.enabled = false;
+        _mapsCanvas.enabled = true;
+    }
+    
+    private void OnExitShopButtonClicked()
+    {
+        _sceneLoader.Menu();
     }
 }

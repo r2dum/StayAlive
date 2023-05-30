@@ -71,10 +71,10 @@ public class PoolMono<T> where T : MonoBehaviour
         throw new Exception($"No free elements in pool of type {typeof(T)}");
     }
 
-    public T GetFreeElement(Transform spawnPoint)
+    public T GetFreeElement(Transform spawnPosition)
     {
         var element = GetFreeElement();
-        element.transform.position = spawnPoint.position;
+        element.transform.position = spawnPosition.position;
         return element;
     }
 }

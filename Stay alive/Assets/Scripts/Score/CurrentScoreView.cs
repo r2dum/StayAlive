@@ -17,7 +17,7 @@ public class CurrentScoreView : MonoBehaviour
         _currentScore.ScoreChanged += SetView;
     }
     
-    public void OnDisable()
+    private void OnDisable()
     {
         _bombsHandler.BombDropped -= OnBombDropped;
         _currentScore.ScoreChanged -= SetView;

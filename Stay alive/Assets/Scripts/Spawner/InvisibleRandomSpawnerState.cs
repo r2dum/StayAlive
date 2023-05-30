@@ -23,10 +23,10 @@ public class InvisibleRandomSpawnerState : RandomSpawnerState
     {
         if (RandomTime(0.35f, 1.25f))
         {
-            if (_currentScore.Score % 83 == 0 && _currentScore.Score != 0)
-                _stateSwitcher.SwitchState<RandomSpawnerState>();
-            
             _factory.Spawn(_spawnBombPositions.RandomPosition(), GameContentType.Bomb);
+            
+            if (_currentScore.Amount % 38 == 0)
+                _stateSwitcher.SwitchState<RandomSpawnerState>();
         }
     }
 }
