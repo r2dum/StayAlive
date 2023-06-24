@@ -24,6 +24,7 @@ public class Game : MonoBehaviour
     private BestScore _bestScore;
     private BombsHandler _bombsHandler;
     private WarnsHandler _warnsHandler;
+    private BonusesHandler _bonusesHandler;
     private PauseHandler _pauseHandler;
     private JsonSaveSystem _jsonSaveSystem;
     private PlayerPrefsSystem _playerPrefsSystem;
@@ -41,9 +42,10 @@ public class Game : MonoBehaviour
         CurrentScore();
         BestScore();
         GameContentFactory();
-        SpawnerStation();
         BombsHandler();
         WarnsHandler();
+        BonusesHandler();
+        SpawnerStation();
         View(sceneLoader);
         SetPause(true);
     }
@@ -51,6 +53,7 @@ public class Game : MonoBehaviour
     public void BeginGame()
     {
         _map.DestroyPlayButton();
+        _spawnerStation.StartCurrentState();
         _gameCanvas.enabled = true;
         SetPause(false);
     }
@@ -89,8 +92,8 @@ public class Game : MonoBehaviour
         {
             if (playerPrefab.name == _shopData.CurrentPlayer)
             {
-                var player = Instantiate(playerPrefab.gameObject);
-                _player = player.GetComponent<Player>();
+                var player = Instantiate(playerPrefab);
+                _player = player;
                 _pauseHandler.AddToPauseList(_player);
             }
         }
@@ -102,8 +105,8 @@ public class Game : MonoBehaviour
         {
             if (mapPrefab.name == _shopData.CurrentMap)
             {
-                var map = Instantiate(mapPrefab.gameObject);
-                _map = map.GetComponent<Map>();
+                var map = Instantiate(mapPrefab);
+                _map = map;
             }
         }
     }
@@ -147,7 +150,7 @@ public class Game : MonoBehaviour
     
     private void SpawnerStation()
     {
-        _spawnerStation.Initialize(_gameContentFactory, _currentScore);
+        _spawnerStation.Initialize(_gameContentFactory, _currentScore, _bombsHandler);
         _pauseHandler.AddToPauseList(_spawnerStation);
     }
     
@@ -161,6 +164,12 @@ public class Game : MonoBehaviour
     {
         _warnsHandler = new WarnsHandler(_gameContentFactory);
         _pauseHandler.AddToPauseList(_warnsHandler);
+    }
+    
+    private void BonusesHandler()
+    {
+        _bonusesHandler = new BonusesHandler(_gameContentFactory);
+        _pauseHandler.AddToPauseList(_bonusesHandler);
     }
     
     private void View(SceneLoader sceneLoader)

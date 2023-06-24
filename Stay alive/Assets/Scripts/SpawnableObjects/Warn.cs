@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-public class Warn : MonoBehaviour, ISpawnable, IPauseHandler
+public class Warn : MonoBehaviour, ISpawnable
 {
     private Animator _animator;
     private bool _isPaused;
     
-    public event Action<Warn> Disabled;
+    public event Action<ISpawnable> Disabled;
     
     private void Start()
     {

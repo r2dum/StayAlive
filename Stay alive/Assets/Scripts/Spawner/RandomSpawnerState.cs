@@ -1,27 +1,46 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class RandomSpawnerState : BaseSpawnerState
 {
-    [Range(1f, 1.35f)] private float _timeSpawn;
-
+    private readonly Transform[] _spawnBonusPositions;
+    
+    private float _timeSpawn;
+    private int _lastRandomPosition;
+    
+    protected readonly BombsHandler _bombsHandler;
+    
     public RandomSpawnerState(IFactory factory, IStationStateSwitcher stateSwitcher, 
-        List<Transform> spawnBombPositions, List<Transform> spawnWarnPositions, CurrentScore currentScore) 
-        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, currentScore)
+        Transform[] spawnBombPositions, Transform[] spawnWarnPositions, Transform[] spawnBonusPositions,
+        CurrentScore currentScore, Text statusText, BombsHandler bombsHandler) 
+        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, currentScore, statusText)
     {
+        _spawnBonusPositions = spawnBonusPositions;
+        _bombsHandler = bombsHandler;
     }
 
-    public override void Start()
+    public override async void Start()
     {
-        Debug.Log("Random Start");
+        _bombsHandler.BombDisabled += SpawnBonus;
+        await ShowAndHideStatus("Random Spawn");
     }
 
     public override void Stop()
     {
-        Debug.Log("Random Stop");
+        _bombsHandler.BombDisabled -= SpawnBonus;
     }
     
     public override void Spawn()
+    {
+        if (_currentScore.Amount % 14 == 0 && _currentScore.Amount != 0)
+            _stateSwitcher.RandomSwitchState<BrokenRandomSpawnerState, TriggerSpawnerState>();
+        
+        RandomSpawn();
+    }
+    
+    protected void RandomSpawn()
     {
         if (RandomTime(0.35f, 1.25f))
         {
@@ -29,12 +48,15 @@ public class RandomSpawnerState : BaseSpawnerState
 
             _factory.Spawn(_spawnBombPositions[position], GameContentType.Bomb);
             _factory.Spawn(_spawnWarnPositions[position], GameContentType.Warn);
-            
-            if (_currentScore.Amount == 0)
-                return;
-            
-            if (_currentScore.Amount % 15 == 0)
-                _stateSwitcher.SwitchState<InvisibleRandomSpawnerState>();
+        }
+    }
+    
+    protected void SpawnBonus(ISpawnable bomb, Transform bombPosition)
+    {
+        if (Chance(50))
+        {
+            var position = Array.IndexOf(_spawnBombPositions, bombPosition);
+            _factory.Spawn(_spawnBonusPositions[position], GameContentType.Coin);
         }
     }
     
@@ -50,8 +72,19 @@ public class RandomSpawnerState : BaseSpawnerState
         return false;
     }
     
-    private int RandomPosition()
+    protected int RandomPosition()
     {
-        return Random.Range(0, _spawnBombPositions.Count);
+        var position = Random.Range(0, _spawnBombPositions.Length);
+        
+        while (_lastRandomPosition == position)
+            position = Random.Range(0, _spawnBombPositions.Length);
+
+        _lastRandomPosition = position;
+        return position;
+    }
+    
+    private bool Chance(int chance)
+    {
+        return Random.Range(0, 101) < chance;
     }
 }

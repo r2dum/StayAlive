@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class WarnsHandler : IPauseHandler
 {
     private readonly GameContentFactory _factory;
     
-    private readonly List<Warn> _warns = new List<Warn>();
-    public IReadOnlyCollection<Warn> Warns => _warns;
-    
-    public event Action<Warn> WarnDisabled;
-    
+    private readonly Dictionary<ISpawnable, Transform> _warns = 
+        new Dictionary<ISpawnable, Transform>();
+    public IReadOnlyDictionary<ISpawnable, Transform> Warns => _warns;
+
     public WarnsHandler(GameContentFactory factory)
     {
         _factory = factory;
@@ -21,32 +20,27 @@ public class WarnsHandler : IPauseHandler
         _factory.WarnSpawned -= AddToListWarn;
     }
 
-    private void AddToListWarn(Warn warn)
+    private void AddToListWarn(ISpawnable warn, Transform position)
     {
-        _warns.Add(warn);
-
+        _warns.Add(warn, position);
+        
         warn.Disabled += RemoveFromListWarn;
-        warn.Disabled += OnWarnDisabled;
     }
     
-    private void RemoveFromListWarn(Warn warn)
+    private void RemoveFromListWarn(ISpawnable warn)
     {
         warn.Disabled -= RemoveFromListWarn;
-        warn.Disabled -= OnWarnDisabled;
-        
+
+        _warns.TryGetValue(warn, out var position);
+        position.gameObject.SetActive(false);
         _warns.Remove(warn);
-    }
-    
-    private void OnWarnDisabled(Warn warn)
-    {
-        WarnDisabled?.Invoke(warn);
     }
     
     public void SetPause(bool isPaused)
     {
         foreach (var warn in _warns)
         {
-            warn.SetPause(isPaused);
+            warn.Key.SetPause(isPaused);
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class WalletSoundWithUIView : MonoBehaviour
 {
     [SerializeField] private Text _coinsText;
-    [SerializeField] private AudioSource _pickCoinSound;
+    [SerializeField] private AudioSource _coinSound;
     
     private Wallet _wallet;
 
@@ -12,21 +12,23 @@ public class WalletSoundWithUIView : MonoBehaviour
     {
         _wallet = wallet;
         _wallet.CoinsChanged += SetAmount;
-        SetAmount(_wallet.Coins);
+        _wallet.CoinsChanged += PlayCoinSound;
+        SetAmount();
     }
     
     private void OnDisable()
     {
         _wallet.CoinsChanged -= SetAmount;
+        _wallet.CoinsChanged -= PlayCoinSound;
     }
 
-    private void SetAmount(int amount)
+    private void SetAmount()
     {
-        _coinsText.text = $"{amount}";
+        _coinsText.text = $"{_wallet.Coins}";
     }
 
-    private void PlaySound()
+    private void PlayCoinSound()
     {
-        _pickCoinSound.Play();
+        _coinSound.Play();
     }
 }

@@ -37,13 +37,13 @@ public class GamePause : MonoBehaviour
     private IEnumerator ResumeWithTimer()
     {
         _pausePanel.Hide();
-        _pauseTimerText.gameObject.SetActive(true);
+        _pauseTimerText.enabled = true;
         for (int i = 3; i >= 1; i--)
         {
             _pauseTimerText.text = $"{i}";
             yield return _delay;
         }
-        _pauseTimerText.gameObject.SetActive(false);
+        _pauseTimerText.enabled = false;
         _pauseButton.gameObject.SetActive(true);
         SetPause(false);
     }

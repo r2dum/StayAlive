@@ -130,9 +130,9 @@ public class Shop : MonoBehaviour
     
     private void CheckHavePlayer()
     {
-        for (int i = 0; i < _shopData.HavePlayers.Count; i++)
+        foreach (var player in _shopData.HavePlayers)
         {
-            if (_players[_player].name == _shopData.HavePlayers[i])
+            if (_players[_player].name == player)
             {
                 _selectedPlayerText.gameObject.SetActive(false);
                 _buttonBuyPlayer.gameObject.SetActive(false);
@@ -149,9 +149,9 @@ public class Shop : MonoBehaviour
     
     private void CheckHaveMap()
     {
-        for (int i = 0; i < _shopData.HaveMaps.Count; i++)
+        foreach (var map in _shopData.HaveMaps)
         {
-            if (_maps[_map].name == _shopData.HaveMaps[i])
+            if (_maps[_map].name == map)
             {
                 _selectedMapText.gameObject.SetActive(false);
                 _buttonBuyMap.gameObject.SetActive(false);

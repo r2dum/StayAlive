@@ -75,6 +75,14 @@ public class PoolMono<T> where T : MonoBehaviour
     {
         var element = GetFreeElement();
         element.transform.position = spawnPosition.position;
+        spawnPosition.gameObject.SetActive(true);
+        return element;
+    }
+    
+    public T GetFreeElement(Transform spawnPosition, Action<T, Transform> action)
+    {
+        var element = GetFreeElement(spawnPosition);
+        action?.Invoke(element, spawnPosition);
         return element;
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Bomb : MonoBehaviour, ISpawnable, IPauseHandler
+public class Bomb : MonoBehaviour, ISpawnable
 {
     [SerializeField] private float _speed = 9f;
     [SerializeField] private float _destroyPos = -3.8f;
@@ -10,7 +10,7 @@ public class Bomb : MonoBehaviour, ISpawnable, IPauseHandler
     
     private bool _isPaused;
     
-    public event Action<Bomb> Dropped;
+    public event Action<ISpawnable> Disabled;
     
     private void Update()
     {
@@ -23,7 +23,7 @@ public class Bomb : MonoBehaviour, ISpawnable, IPauseHandler
         {
             Instantiate(_particle, transform.position, Quaternion.identity);
             gameObject.SetActive(false);
-            Dropped?.Invoke(this);
+            Disabled?.Invoke(this);
         }
     }
 

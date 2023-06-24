@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class BombsHandler : IPauseHandler
 {
     private readonly GameContentFactory _factory;
     
-    private readonly List<Bomb> _bombs = new List<Bomb>();
-    public IReadOnlyCollection<Bomb> Bombs => _bombs;
+    private readonly Dictionary<ISpawnable, Transform> _bombs = 
+        new Dictionary<ISpawnable, Transform>();
+    public IReadOnlyDictionary<ISpawnable, Transform> Bombs => _bombs;
     
-    public event Action<Bomb> BombDropped;
+    public event Action<ISpawnable, Transform> BombDisabled;
     
     public BombsHandler(GameContentFactory factory)
     {
@@ -21,32 +23,27 @@ public class BombsHandler : IPauseHandler
         _factory.BombSpawned -= AddToListBomb;
     }
 
-    private void AddToListBomb(Bomb bomb)
+    private void AddToListBomb(ISpawnable bomb, Transform position)
     {
-        _bombs.Add(bomb);
-
-        bomb.Dropped += RemoveFromListBomb;
-        bomb.Dropped += OnBombDropped;
+        _bombs.Add(bomb, position);
+        bomb.Disabled += RemoveFromListBomb;
     }
     
-    private void RemoveFromListBomb(Bomb bomb)
+    private void RemoveFromListBomb(ISpawnable bomb)
     {
-        bomb.Dropped -= RemoveFromListBomb;
-        bomb.Dropped -= OnBombDropped;
+        bomb.Disabled -= RemoveFromListBomb;
         
+        _bombs.TryGetValue(bomb, out var position);
+        BombDisabled?.Invoke(bomb, position);
+        position.gameObject.SetActive(false);
         _bombs.Remove(bomb);
-    }
-    
-    private void OnBombDropped(Bomb bomb)
-    {
-        BombDropped?.Invoke(bomb);
     }
     
     public void SetPause(bool isPaused)
     {
         foreach (var bomb in _bombs)
         {
-            bomb.SetPause(isPaused);
+            bomb.Key.SetPause(isPaused);
         }
     }
 }

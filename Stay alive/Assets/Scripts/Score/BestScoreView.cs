@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class BestScoreView : MonoBehaviour
 {
-    [SerializeField] private Text[] _bestScoreText;
+    [SerializeField] private Text[] _bestScoreTexts;
 
     private BestScore _bestScore;
 
@@ -21,9 +21,9 @@ public class BestScoreView : MonoBehaviour
 
     private void SetView(int record)
     {
-        for (int i = 0; i < _bestScoreText.Length; i++)
+        foreach (var bestScoreText in _bestScoreTexts)
         {
-            _bestScoreText[i].text = $"{record}";
+            bestScoreText.text = $"{record}";
         }
     }
 }

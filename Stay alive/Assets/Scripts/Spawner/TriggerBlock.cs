@@ -3,15 +3,11 @@ using UnityEngine;
 
 public class TriggerBlock : MonoBehaviour
 {
-    [SerializeField] private int _position;
-
-    public event Action<int> Triggered;
-
+    public event Action<TriggerBlock> Triggered;
+    
     private void OnTriggerEnter(Collider trigger)
     {
         if (trigger.TryGetComponent(out Player player))
-        {
-            Triggered?.Invoke(_position);
-        }
+            Triggered?.Invoke(this);
     }
 }

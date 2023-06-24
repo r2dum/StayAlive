@@ -5,18 +5,22 @@ public class GameContentFactory : MonoBehaviour, IFactory
 {
     [SerializeField] private Bomb[] _bombPrefabs;
     [SerializeField] private Warn _warnPrefab;
+    [SerializeField] private Coin _coinPrefab;
 
     [SerializeField] private Transform _bombsContainer;
     [SerializeField] private Transform _warnsContainer;
+    [SerializeField] private Transform _coinsContainer;
 
     [SerializeField] private int _poolCount;
     [SerializeField] private bool _autoExpand;
 
     private PoolMono<Bomb> _bombsPool;
     private PoolMono<Warn> _warnsPool;
+    private PoolMono<Coin> _coinsPool;
     
-    public event Action<Bomb> BombSpawned;
-    public event Action<Warn> WarnSpawned;
+    public event Action<ISpawnable, Transform> BombSpawned;
+    public event Action<ISpawnable, Transform> WarnSpawned;
+    public event Action<ISpawnable, Transform> BonusSpawned;
     
     public void Initialize(BombType bombType)
     {
@@ -25,22 +29,26 @@ public class GameContentFactory : MonoBehaviour, IFactory
 
         _warnsPool = new PoolMono<Warn>(_warnPrefab, _poolCount, _warnsContainer);
         _warnsPool.AutoExpand = _autoExpand;
+
+        _coinsPool = new PoolMono<Coin>(_coinPrefab, _poolCount, _coinsContainer);
+        _coinsPool.AutoExpand = _autoExpand;
     }
 
     public ISpawnable Spawn(Transform position, GameContentType type)
     {
+        if (position.gameObject.activeInHierarchy)
+            return null;
+        
         switch (type)
         {
             case GameContentType.Bomb:
-                var bomb = _bombsPool.GetFreeElement(position);
-                BombSpawned?.Invoke(bomb);
-                return bomb;
+                return _bombsPool.GetFreeElement(position, BombSpawned);
             case GameContentType.Warn:
-                var warn = _warnsPool.GetFreeElement(position);
-                WarnSpawned?.Invoke(warn);
-                return warn;
+                return _warnsPool.GetFreeElement(position, WarnSpawned);
+            case GameContentType.Coin:
+                return _coinsPool.GetFreeElement(position, BonusSpawned);
             default:
-                throw new Exception("Invalid product type.");
+                throw new ArgumentException("Invalid product type.");
         }
     }
 

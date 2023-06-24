@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8190947843298870406}
-  - component: {fileID: 8190947843298870411}
-  - component: {fileID: 8190947843298870404}
-  - component: {fileID: 8190947843298870405}
-  - component: {fileID: -8513246708736430077}
+  - component: {fileID: 6271934679873133858}
+  - component: {fileID: 6847688572309752602}
+  - component: {fileID: 3186726704750964342}
+  - component: {fileID: 740044910139136184}
   m_Layer: 0
   m_Name: Coin
   m_TagString: coin
@@ -35,7 +35,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8190947843298870411
+--- !u!33 &6271934679873133858
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,7 +43,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8190947843298870407}
   m_Mesh: {fileID: -2432090755550338912, guid: 52c78d774e09d5846a324522c7d3bd60, type: 3}
---- !u!23 &8190947843298870404
+--- !u!23 &6847688572309752602
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,7 +85,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &8190947843298870405
+--- !u!65 &3186726704750964342
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,7 +98,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &-8513246708736430077
+--- !u!114 &740044910139136184
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
