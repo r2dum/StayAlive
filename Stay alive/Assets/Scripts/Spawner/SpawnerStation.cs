@@ -15,30 +15,31 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandle
     private List<BaseSpawnerState> _allSpawnerStates;
     
     private IFactory _factory;
-    private CurrentScore _currentScore;
     private BombsHandler _bombsHandler;
+    private BonusSpawner _bonusSpawner;
     
     private bool _isPaused;
     
-    public void Initialize(IFactory factory, CurrentScore currentScore, BombsHandler bombsHandler)
+    public void Initialize(IFactory factory, BombsHandler bombsHandler)
     {
         _factory = factory;
-        _currentScore = currentScore;
         _bombsHandler = bombsHandler;
         
         _allSpawnerStates = new List<BaseSpawnerState>()
         {
-            new RandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, 
-                _spawnBonusPositions, _currentScore, _statusText, _bombsHandler),
-            new TriggerSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, 
-                _spawnBonusPositions, _currentScore, _statusText, _bombsHandler, _triggerBlocks),
-            new InvisibleRandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, 
-                _spawnBonusPositions, _currentScore, _statusText, _bombsHandler),
-            new BrokenRandomSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, 
-                _spawnBonusPositions, _currentScore, _statusText, _bombsHandler),
-            new OneFreeBlockSpawnerState(_factory, this, _spawnBombPositions, _spawnWarnPositions, 
-                _currentScore, _statusText)
+            new RandomSpawnerState(_factory, this, _spawnBombPositions, 
+                _spawnWarnPositions, _statusText),
+            new TriggerSpawnerState(_factory, this, _spawnBombPositions, 
+                _spawnWarnPositions, _statusText, _triggerBlocks),
+            new InvisibleRandomSpawnerState(_factory, this, _spawnBombPositions,
+                _spawnWarnPositions, _statusText),
+            new BrokenRandomSpawnerState(_factory, this, _spawnBombPositions, 
+                _spawnWarnPositions, _statusText),
+            new OneFreeBlockSpawnerState(_factory, this, _spawnBombPositions, 
+                _spawnWarnPositions, _statusText)
         };
+        
+        _bonusSpawner = new BonusSpawner(_factory, _bombsHandler, _spawnBonusPositions ,_spawnBombPositions);
         
         SwitchState<RandomSpawnerState>();
     }

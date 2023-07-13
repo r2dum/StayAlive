@@ -24,12 +24,15 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
     private Vector3 _currentPosition;
     private Vector3 _targetPosition;
     
+    private PlayerArmour _playerArmour;
     private Rigidbody _rigidbody;
 
     public event Action Died;
 
-    private void Start()
+    public void Initialize(PlayerArmour playerArmour)
     {
+        _playerArmour = playerArmour;
+        
         _rigidbody = GetComponent<Rigidbody>();
         _rigidbody.isKinematic = true;
         
@@ -48,8 +51,14 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
     
     private void OnTriggerEnter(Collider trigger)
     {
+        if (trigger.TryGetComponent(out Armour armour))
+            _playerArmour.Activate(7);
+            
         if (trigger.TryGetComponent(out Bomb bomb))
         {
+            if (_playerArmour.gameObject.activeInHierarchy)
+                return;
+            
             Instantiate(_dieParticle, transform.position, Quaternion.identity);
             gameObject.SetActive(false);
             Died?.Invoke();

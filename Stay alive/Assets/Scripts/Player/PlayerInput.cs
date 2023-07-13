@@ -13,7 +13,12 @@ public class PlayerInput : MonoBehaviour, IPauseHandler
         _input = input;
         _input.Swiped += OnSwiped;
     }
-
+    
+    private void OnDisable()
+    {
+        _input.Swiped -= OnSwiped;
+    }
+    
     private void Update()
     {
         if (_isPaused)

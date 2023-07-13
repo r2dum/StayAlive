@@ -7,17 +7,15 @@ public class TriggerSpawnerState : RandomSpawnerState
     private readonly TriggerBlock[] _triggerBlocks;
 
     public TriggerSpawnerState(IFactory factory, IStationStateSwitcher stateSwitcher, 
-        Transform[] spawnBombPositions, Transform[] spawnWarnPositions, Transform[] spawnBonusPositions, 
-        CurrentScore currentScore, Text statusText, BombsHandler bombsHandler, TriggerBlock[] triggerBlock) 
-        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions,
-            spawnBonusPositions, currentScore, statusText, bombsHandler)
+        Transform[] spawnBombPositions, Transform[] spawnWarnPositions, Text statusText, TriggerBlock[] triggerBlock) 
+        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, statusText)
     {
         _triggerBlocks = triggerBlock;
     }
     
     public override async void Start()
     {
-        _bombsHandler.BombDisabled += SpawnBonus;
+        SetStateTime(10f, 15f);
         
         foreach (var block in _triggerBlocks)
         {
@@ -30,8 +28,6 @@ public class TriggerSpawnerState : RandomSpawnerState
     
     public override void Stop()
     {
-        _bombsHandler.BombDisabled -= SpawnBonus;
-        
         foreach (var block in _triggerBlocks)
         {
             block.gameObject.SetActive(false);
@@ -41,7 +37,7 @@ public class TriggerSpawnerState : RandomSpawnerState
     
     public override void Spawn()
     {
-        if (_currentScore.Amount % 42 == 0)
+        if (StateTimeIsOver())
             _stateSwitcher.RandomSwitchState<OneFreeBlockSpawnerState, InvisibleRandomSpawnerState>();
         
         RandomSpawn();

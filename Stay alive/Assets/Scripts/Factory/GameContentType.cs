@@ -2,5 +2,6 @@
 {
     Bomb,
     Warn,
-    Coin
+    Coin,
+    Armour
 }

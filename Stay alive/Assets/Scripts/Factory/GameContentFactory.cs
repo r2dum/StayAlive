@@ -6,6 +6,7 @@ public class GameContentFactory : MonoBehaviour, IFactory
     [SerializeField] private Bomb[] _bombPrefabs;
     [SerializeField] private Warn _warnPrefab;
     [SerializeField] private Coin _coinPrefab;
+    [SerializeField] private Armour _armourPrefab;
 
     [SerializeField] private Transform _bombsContainer;
     [SerializeField] private Transform _warnsContainer;
@@ -47,6 +48,12 @@ public class GameContentFactory : MonoBehaviour, IFactory
                 return _warnsPool.GetFreeElement(position, WarnSpawned);
             case GameContentType.Coin:
                 return _coinsPool.GetFreeElement(position, BonusSpawned);
+            case GameContentType.Armour:
+                var armour = Instantiate(_armourPrefab);
+                armour.transform.position = position.position;
+                position.gameObject.SetActive(true);
+                BonusSpawned?.Invoke(armour, position);
+                return armour;
             default:
                 throw new ArgumentException("Invalid product type.");
         }

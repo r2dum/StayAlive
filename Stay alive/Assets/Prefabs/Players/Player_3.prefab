@@ -141,7 +141,7 @@ GameObject:
   - component: {fileID: 7121405211267211878}
   m_Layer: 0
   m_Name: Mesh
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -275,8 +275,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.85, y: 0.8, z: 0.7}
-  m_Center: {x: 0, y: 0.4, z: 0.2}
+  m_Size: {x: 0.85, y: 0.8, z: 0.85}
+  m_Center: {x: -0.05, y: 0.4, z: 0.2}
 --- !u!114 &2958561430112430833
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,30 +4,27 @@ using UnityEngine.UI;
 public class InvisibleRandomSpawnerState : RandomSpawnerState
 {
     public InvisibleRandomSpawnerState(IFactory factory, IStationStateSwitcher stateSwitcher, 
-        Transform[] spawnBombPositions, Transform[] spawnWarnPositions, Transform[] spawnBonusPositions, 
-        CurrentScore currentScore, Text statusText, BombsHandler bombsHandler) 
-        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, 
-            spawnBonusPositions, currentScore, statusText, bombsHandler)
+        Transform[] spawnBombPositions, Transform[] spawnWarnPositions, Text statusText) 
+        : base(factory, stateSwitcher, spawnBombPositions, spawnWarnPositions, statusText)
     {
     }
 
     public override async void Start()
     {
-        _bombsHandler.BombDisabled += SpawnBonus;
+        SetStateTime(10f, 15f);
         await ShowAndHideStatus("Invisible Random Spawn");
     }
 
     public override void Stop()
     {
-        _bombsHandler.BombDisabled -= SpawnBonus;
     }
 
     public override void Spawn()
     {
-        if (_currentScore.Amount % 37 == 0)
+        if (StateTimeIsOver())
             _stateSwitcher.RandomSwitchState<RandomSpawnerState, TriggerSpawnerState>();
         
-        if (RandomTime(0.35f, 1.25f))
+        if (RandomTimeSpawn(0.35f, 1.25f))
             _factory.Spawn(_spawnBombPositions[RandomPosition()], GameContentType.Bomb);
     }
 }

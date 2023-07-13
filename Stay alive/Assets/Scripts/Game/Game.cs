@@ -3,6 +3,7 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     [SerializeField] private Player[] _playerPrefabs;
+    [SerializeField] private PlayerArmour _playerArmourPrefab;
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private Map[] _mapPrefabs;
     [SerializeField] private GameUIColor _gameUIColor;
@@ -13,10 +14,12 @@ public class Game : MonoBehaviour
     [SerializeField] private WalletSoundWithUIView _walletView;
     [SerializeField] private CurrentScoreView _currentScoreView;
     [SerializeField] private BestScoreView _bestScoreView;
+    [SerializeField] private PlayerArmourView _playerArmourView;
     [SerializeField] private Canvas _gameCanvas;
     [SerializeField] private int _gameFps;
     
     private Player _player;
+    private PlayerArmour _playerArmour;
     private Map _map;
     private ShopData _shopData;
     private Wallet _wallet;
@@ -35,10 +38,10 @@ public class Game : MonoBehaviour
         SaveSystems();
         ShopData();
         PauseHandler();
-        LoadPlayer();
-        Wallet();
-        Input();
-        LoadMap();
+        PlayerPrefab();
+        PlayerComponents();
+        PlayerInput();
+        MapPrefab();
         CurrentScore();
         BestScore();
         GameContentFactory();
@@ -86,38 +89,38 @@ public class Game : MonoBehaviour
         _pauseHandler.SetPause(isPaused);
     }
     
-    private void LoadPlayer()
+    private void PlayerPrefab()
     {
         foreach (var playerPrefab in _playerPrefabs)
         {
             if (playerPrefab.name == _shopData.CurrentPlayer)
             {
-                var player = Instantiate(playerPrefab);
-                _player = player;
+                _player = Instantiate(playerPrefab);
                 _pauseHandler.AddToPauseList(_player);
             }
         }
     }
     
-    private void LoadMap()
+    private void MapPrefab()
     {
         foreach (var mapPrefab in _mapPrefabs)
         {
             if (mapPrefab.name == _shopData.CurrentMap)
             {
-                var map = Instantiate(mapPrefab);
-                _map = map;
+                _map = Instantiate(mapPrefab);
             }
         }
     }
     
-    private void Wallet()
+    private void PlayerComponents()
     {
         _wallet = _player.GetComponent<Wallet>();
         _wallet.Initialize(_playerPrefsSystem);
+        _playerArmour = Instantiate(_playerArmourPrefab, _player.transform, false);
+        _player.Initialize(_playerArmour);
     }
     
-    private void Input()
+    private void PlayerInput()
     {
         if (SystemInfo.deviceType == DeviceType.Handheld)
         {
@@ -150,7 +153,7 @@ public class Game : MonoBehaviour
     
     private void SpawnerStation()
     {
-        _spawnerStation.Initialize(_gameContentFactory, _currentScore, _bombsHandler);
+        _spawnerStation.Initialize(_gameContentFactory, _bombsHandler);
         _pauseHandler.AddToPauseList(_spawnerStation);
     }
     
@@ -176,6 +179,7 @@ public class Game : MonoBehaviour
     {
         _gameUIColor.Initialize(_map.Color);
         _walletView.Initialize(_wallet);
+        _playerArmourView.Initialize(_playerArmour);
         _currentScoreView.Initialize(_currentScore, _bombsHandler);
         _bestScoreView.Initialize(_bestScore);
         _gameLose.Initialize(_player, _wallet, _bestScore, 

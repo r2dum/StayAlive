@@ -11,6 +11,7 @@ TagManager:
   - coin
   - map
   - BombsText
+  - PlayerArmour
   layers:
   - Default
   - TransparentFX
