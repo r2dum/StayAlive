@@ -28,26 +28,21 @@ public class BonusSpawner
     
     private void Spawn(ISpawnable bomb, Transform bombPosition)
     {
-        var chance = Chance();
+        var chance = Random.Range(0, 101);
         var position = Array.IndexOf(_spawnBombPositions, bombPosition);
         
         switch (chance)
         {
-            case >= 10 and <= 50:
-            {
-                _factory.Spawn(_spawnBonusPositions[position], GameContentType.Coin);
-                break;
-            }
-            case <= 0:
+            case <= 3:
             {
                 _factory.Spawn(_spawnBonusPositions[position], GameContentType.Armour);
                 break;
             }
+            case <= 40:
+            {
+                _factory.Spawn(_spawnBonusPositions[position], GameContentType.Coin);
+                break;
+            }
         }
-    }
-    
-    private int Chance()
-    {
-        return Random.Range(0, 101);
     }
 }

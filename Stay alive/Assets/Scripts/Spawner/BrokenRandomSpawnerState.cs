@@ -15,10 +15,6 @@ public class BrokenRandomSpawnerState : RandomSpawnerState
         await ShowAndHideStatus("Broken Random Spawn");
     }
     
-    public override void Stop()
-    {
-    }
-    
     public override void Spawn()
     {
         if (StateTimeIsOver())

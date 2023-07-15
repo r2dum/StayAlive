@@ -39,7 +39,7 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandle
                 _spawnWarnPositions, _statusText)
         };
         
-        _bonusSpawner = new BonusSpawner(_factory, _bombsHandler, _spawnBonusPositions ,_spawnBombPositions);
+        _bonusSpawner = new BonusSpawner(_factory, _bombsHandler, _spawnBonusPositions, _spawnBombPositions);
         
         SwitchState<RandomSpawnerState>();
     }
@@ -62,7 +62,9 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandle
             return;
         }
         
-        _currentSpawnerState.Stop();
+        if (_currentSpawnerState is IStoppable stoppable)
+            stoppable.Stop();
+        
         state.Start();
         _currentSpawnerState = state;
     }

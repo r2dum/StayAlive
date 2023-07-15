@@ -17,10 +17,6 @@ public class RandomSpawnerState : BaseSpawnerState
         SetStateTime(10f, 15f);
         await ShowAndHideStatus("Random Spawn");
     }
-
-    public override void Stop()
-    {
-    }
     
     public override void Spawn()
     {

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TriggerSpawnerState : RandomSpawnerState
+public class TriggerSpawnerState : RandomSpawnerState, IStoppable
 {
     private readonly TriggerBlock[] _triggerBlocks;
 
@@ -26,7 +26,7 @@ public class TriggerSpawnerState : RandomSpawnerState
         await ShowAndHideStatus("Trigger Spawn");
     }
     
-    public override void Stop()
+    public void Stop()
     {
         foreach (var block in _triggerBlocks)
         {

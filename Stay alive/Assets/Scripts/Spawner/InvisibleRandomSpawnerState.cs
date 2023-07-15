@@ -14,11 +14,7 @@ public class InvisibleRandomSpawnerState : RandomSpawnerState
         SetStateTime(10f, 15f);
         await ShowAndHideStatus("Invisible Random Spawn");
     }
-
-    public override void Stop()
-    {
-    }
-
+    
     public override void Spawn()
     {
         if (StateTimeIsOver())

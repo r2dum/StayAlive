@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class OneFreeBlockSpawnerState : BaseSpawnerState
+public class OneFreeBlockSpawnerState : BaseSpawnerState, IStoppable
 {
     private bool _isSpawned;
     
@@ -18,7 +18,7 @@ public class OneFreeBlockSpawnerState : BaseSpawnerState
         await ShowAndHideStatus("One block is free!!!");
     }
 
-    public override void Stop()
+    public void Stop()
     {
         _isSpawned = false;
     }
