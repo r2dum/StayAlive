@@ -52,8 +52,8 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
     private void OnTriggerEnter(Collider trigger)
     {
         if (trigger.TryGetComponent(out Armour armour))
-            _playerArmour.Activate(7);
-            
+            _playerArmour.Activate();
+        
         if (trigger.TryGetComponent(out Bomb bomb))
         {
             if (_playerArmour.gameObject.activeInHierarchy)

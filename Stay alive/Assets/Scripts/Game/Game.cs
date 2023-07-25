@@ -117,6 +117,7 @@ public class Game : MonoBehaviour
         _wallet = _player.GetComponent<Wallet>();
         _wallet.Initialize(_playerPrefsSystem);
         _playerArmour = Instantiate(_playerArmourPrefab, _player.transform, false);
+        _pauseHandler.AddToPauseList(_playerArmour);
         _player.Initialize(_playerArmour);
     }
     

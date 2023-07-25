@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Bomb : MonoBehaviour, ISpawnable
 {
     [SerializeField] private float _speed = 9f;

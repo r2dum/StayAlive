@@ -6,6 +6,7 @@ public class GamePause : MonoBehaviour
 {
     [SerializeField] private PausePanel _pausePanel;
     [SerializeField] private LosePanel _losePanel;
+    [SerializeField] private Canvas _menuCanvas;
     [SerializeField] private Button _pauseButton;
     [SerializeField] private Button _resumeButton;
     [SerializeField] private Text _pauseTimerText;
@@ -50,7 +51,8 @@ public class GamePause : MonoBehaviour
     
     private void OnApplicationPause(bool isPaused)
     {
-        if (isPaused && _losePanel.gameObject.activeInHierarchy == false)
+        if (isPaused && _losePanel.gameObject.activeInHierarchy == false && 
+            _menuCanvas.enabled == false)
             OnPauseButtonClicked();
     }
     

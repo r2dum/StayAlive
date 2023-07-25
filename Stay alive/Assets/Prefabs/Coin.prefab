@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8190947843298870406}
   - component: {fileID: 6271934679873133858}
   - component: {fileID: 6847688572309752602}
-  - component: {fileID: 3186726704750964342}
+  - component: {fileID: 66534597002463448}
   - component: {fileID: 740044910139136184}
   m_Layer: 0
   m_Name: Coin
@@ -85,8 +85,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3186726704750964342
-BoxCollider:
+--- !u!135 &66534597002463448
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -96,8 +96,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0.1, z: 0}
 --- !u!114 &740044910139136184
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameLose : MonoBehaviour
 {
     [SerializeField] private LosePanel _losePanel;
+    [SerializeField] private Button _pauseButton;
     
     private Player _player;
     private Wallet _wallet;
@@ -33,6 +35,7 @@ public class GameLose : MonoBehaviour
     private void OnPlayerDied()
     {
         _currentScoreView.enabled = false;
+        _pauseButton.gameObject.SetActive(false);
         _bestScore.TrySave();
         _saveSystem.Save(Constants.CASH, _wallet.Coins);
         _losePanel.Show();

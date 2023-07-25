@@ -2,9 +2,12 @@
 using System.Collections;
 using UnityEngine;
 
-public class PlayerArmour : MonoBehaviour
+public class PlayerArmour : MonoBehaviour, IPauseHandler
 {
-    private int _lifeTime;
+    [SerializeField] private int _lifeTime;
+    
+    private int _currentLifeTime;
+    private bool _isPaused;
     
     private readonly WaitForSecondsRealtime _delay = 
         new WaitForSecondsRealtime(1f);
@@ -12,10 +15,10 @@ public class PlayerArmour : MonoBehaviour
     public event Action<int> TimeChanged;
     public event Action<bool> Activated;
     
-    public void Activate(int lifeTime)
+    public void Activate()
     {
-        _lifeTime = lifeTime;
-        TimeChanged?.Invoke(_lifeTime);
+        _currentLifeTime = _lifeTime;
+        TimeChanged?.Invoke(_currentLifeTime);
         
         if (gameObject.activeInHierarchy == false)
         {
@@ -29,14 +32,24 @@ public class PlayerArmour : MonoBehaviour
     {
         var delayStep = 1;
         
-        while (_lifeTime > 0)
+        while (_currentLifeTime > 0)
         {
-            TimeChanged?.Invoke(_lifeTime);
-            _lifeTime -= delayStep;
+            while (_isPaused)
+            {
+                yield return null;
+            }
+            
+            TimeChanged?.Invoke(_currentLifeTime);
+            _currentLifeTime -= delayStep;
             yield return _delay;
         }
         
         gameObject.SetActive(false);
         Activated?.Invoke(false);
+    }
+    
+    public void SetPause(bool isPaused)
+    {
+        _isPaused = isPaused;
     }
 }
