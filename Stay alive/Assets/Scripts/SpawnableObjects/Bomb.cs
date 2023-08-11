@@ -7,6 +7,7 @@ public class Bomb : MonoBehaviour, ISpawnable
     [SerializeField] private float _speed = 9f;
     [SerializeField] private float _disablePos = -3.8f;
     [SerializeField] private ParticleSystem _particle;
+    [SerializeField] private Animator _animator;
     [SerializeField] private BombType _type;
     
     private bool _isPaused;
@@ -40,5 +41,7 @@ public class Bomb : MonoBehaviour, ISpawnable
     public void SetPause(bool isPaused)
     {
         _isPaused = isPaused;
+        
+        _animator.speed = (_isPaused ? 0f : 1f);
     }
 }

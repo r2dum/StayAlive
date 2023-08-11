@@ -7,6 +7,7 @@ public class Game : MonoBehaviour
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private Map[] _mapPrefabs;
     [SerializeField] private GameUIColor _gameUIColor;
+    [SerializeField] private ScoreImage[] _scoreImage;
     [SerializeField] private GameLose _gameLose;
     [SerializeField] private GamePause _gamePause;
     [SerializeField] private GameContentFactory _gameContentFactory;
@@ -178,6 +179,11 @@ public class Game : MonoBehaviour
     
     private void View(SceneLoader sceneLoader)
     {
+        foreach (var scoreImage in _scoreImage)
+        {
+            scoreImage.Initialize(_map.BombSprite);
+        }
+        
         _gameUIColor.Initialize(_map.Color);
         _walletView.Initialize(_wallet);
         _playerArmourView.Initialize(_playerArmour);

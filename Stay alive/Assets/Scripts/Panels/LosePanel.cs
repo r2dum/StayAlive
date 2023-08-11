@@ -21,9 +21,9 @@ public class LosePanel : MonoBehaviour
         await _sceneLoader.RestartGame();
     }
     
-    private void OnMainMenuButtonClicked()
+    private async void OnMainMenuButtonClicked()
     {
-        _sceneLoader.Menu();
+        await _sceneLoader.Menu();
     }
     
     public void Show()

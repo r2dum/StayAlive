@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8335790618368517324}
   - component: {fileID: 6591442720936533382}
   - component: {fileID: 7664062351345367314}
+  - component: {fileID: 665479137860757919}
   m_Layer: 0
   m_Name: default
   m_TagString: obstacle
@@ -83,6 +84,26 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!95 &665479137860757919
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 943647167635896311}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e853872969bddb74199dcb3690d5115e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
 --- !u!1 &8112471638208859950
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,4 +183,5 @@ MonoBehaviour:
   _speed: 9
   _disablePos: -3.8
   _particle: {fileID: 6691073170713797617, guid: 3a7352115c0004b418f5a11f9b7bb764, type: 3}
+  _animator: {fileID: 665479137860757919}
   _type: 0

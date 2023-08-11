@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BombsHandler : IPauseHandler
 {
-    private readonly GameContentFactory _factory;
+    private readonly IFactory _factory;
     
     private readonly Dictionary<ISpawnable, Transform> _bombs = 
         new Dictionary<ISpawnable, Transform>();
@@ -12,7 +12,7 @@ public class BombsHandler : IPauseHandler
     
     public event Action<ISpawnable, Transform> BombDisabled;
     
-    public BombsHandler(GameContentFactory factory)
+    public BombsHandler(IFactory factory)
     {
         _factory = factory;
         _factory.BombSpawned += AddToListBomb;

@@ -28,8 +28,8 @@ public class MainMenu : MonoBehaviour
         _game.BeginGame();
     }
     
-    private void OnShopButtonClicked()
+    private async void OnShopButtonClicked()
     {
-        _sceneLoader.Shop();
+        await _sceneLoader.Shop();
     }
 }

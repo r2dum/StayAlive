@@ -1,11 +1,12 @@
 using System;
+using DG.Tweening;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Wallet))]
 public class Player : MonoBehaviour, IMovable, IPauseHandler
 {
-    [SerializeField] private GameObject _mesh;
+    [SerializeField] private Transform _mesh;
     
     [SerializeField] private float _timeForMove = 0.35f;
     [SerializeField] private float _jumpHeight = 1.0f;
@@ -70,27 +71,28 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
         var newPosition = _currentPosition + distance;
         
         if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f) || 
-            _isMove || _isPaused) 
+            _isMove || _isPaused || gameObject.activeInHierarchy == false) 
             return;
         
         _targetPosition = newPosition;
         _elapsedTime = 0;
         _isMove = true;
+        gameObject.transform.DOScale(new Vector3(1f, 0.85f, 1f), 0.25f);
         _jumpSound.Play();
         
         switch (MoveDirection)
         {
             case Direction.North:
-                _mesh.transform.rotation = Quaternion.Euler(0, -90, 0);
+                _mesh.DORotate(new Vector3(0, -90, 0), 0.1f);
                 break;
             case Direction.South:
-                _mesh.transform.rotation = Quaternion.Euler(0, 90, 0);
+                _mesh.DORotate(new Vector3(0, 90, 0), 0.1f);
                 break;
             case Direction.East:
-                _mesh.transform.rotation = Quaternion.Euler(0, 180, 0);
+                _mesh.DORotate(new Vector3(0, 180, 0), 0.1f);
                 break;
             case Direction.West:
-                _mesh.transform.rotation = Quaternion.Euler(0, 0, 0);
+                _mesh.DORotate(new Vector3(0, 0, 0), 0.1f);
                 break;
         }
     }
@@ -111,6 +113,7 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
         {
             _isMove = false;
             _currentPosition = _targetPosition;
+            gameObject.transform.DOScale(new Vector3(1f, 1f, 1f), 0.25f);
         }
     }
     

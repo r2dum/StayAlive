@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,6 +23,9 @@ public class Shop : MonoBehaviour
     [SerializeField] private Button _exitShopButton;
     [SerializeField] private GameUIColor _gameUIColor;
     
+    [SerializeField] private Vector3 _playerShopTarget;
+    [SerializeField] private Vector3 _mapShopTarget;
+    
     [Header("Wallet")]
     [SerializeField] private Wallet _wallet;
     [SerializeField] private WalletSoundWithUIView _walletView;
@@ -30,6 +34,7 @@ public class Shop : MonoBehaviour
     private JsonSaveSystem _jsonSaveSystem;
     private PlayerPrefsSystem _playerPrefsSystem;
     private SceneLoader _sceneLoader;
+    private Camera _camera;
     
     private int _currentPlayerSkin;
     private int _currentMapSkin;
@@ -40,6 +45,7 @@ public class Shop : MonoBehaviour
         _sceneLoader = new SceneLoader();
         _jsonSaveSystem = new JsonSaveSystem();
         _playerPrefsSystem = new PlayerPrefsSystem();
+        _camera = Camera.main;
         
         _shopData = _jsonSaveSystem.Load(_shopData);
         _wallet.Initialize(_playerPrefsSystem);
@@ -60,7 +66,7 @@ public class Shop : MonoBehaviour
         skins[currentSkin].gameObject.SetActive(true);
         
         if (skins == _mapSkins)
-            LoadButtonsColor();
+            LoadUIColor();
     }
     
     private void PlayersShop()
@@ -81,6 +87,8 @@ public class Shop : MonoBehaviour
         LoadButtons(_playerSkins, _currentPlayerSkin);
         _mapsShopButton.ChangeButtonAlpha(0.5f);
         _playersShopButton.ChangeButtonAlpha(1f);
+        DOTween.Sequence()
+            .Append(_camera.transform.DORotate(_playerShopTarget, 0.7f));
     }
     
     private void MapsShop()
@@ -101,6 +109,8 @@ public class Shop : MonoBehaviour
         LoadButtons(_mapSkins, _currentMapSkin);
         _playersShopButton.ChangeButtonAlpha(0.5f);
         _mapsShopButton.ChangeButtonAlpha(1f);
+        DOTween.Sequence()
+            .Append(_camera.transform.DORotate(_mapShopTarget, 0.7f));
     }
 
     private void GlobalCanvas()
@@ -150,7 +160,7 @@ public class Shop : MonoBehaviour
         }
         
         if (skins == _mapSkins)
-            LoadButtonsColor();
+            LoadUIColor();
     }
     
     private void ArrowLeft(List<string> listDataSkins, string dataSkin, ShopItem[] skins, ref int currentSkin)
@@ -173,7 +183,7 @@ public class Shop : MonoBehaviour
         }
         
         if (skins == _mapSkins)
-            LoadButtonsColor();
+            LoadUIColor();
     }
 
     private void SelectItem(out string dataSkin, ShopItem[] skins, int currentSkin)
@@ -245,7 +255,7 @@ public class Shop : MonoBehaviour
             _arrowRightButton.gameObject.SetActive(false);
     }
     
-    private void LoadButtonsColor()
+    private void LoadUIColor()
     {
         _mapSkins[_currentMapSkin].TryGetComponent(out Map map);
         _gameUIColor.Initialize(map.Color);
@@ -254,6 +264,20 @@ public class Shop : MonoBehaviour
     
     private void OnExitShopButtonClicked()
     {
-        _sceneLoader.Menu();
+        if (_camera.transform.eulerAngles.x >= _mapShopTarget.x)
+        {
+            LoadMenu();
+        }
+        else
+        {
+            DOTween.Sequence()
+                .Append(_camera.transform.DORotate(_mapShopTarget, 0.7f))
+                .OnComplete(LoadMenu);
+        }
+    }
+    
+    private async void LoadMenu()
+    {
+        await _sceneLoader.Menu();
     }
 }

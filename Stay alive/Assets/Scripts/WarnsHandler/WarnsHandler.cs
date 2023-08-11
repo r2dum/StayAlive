@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class WarnsHandler : IPauseHandler
 {
-    private readonly GameContentFactory _factory;
+    private readonly IFactory _factory;
     
     private readonly Dictionary<ISpawnable, Transform> _warns = 
         new Dictionary<ISpawnable, Transform>();
     public IReadOnlyDictionary<ISpawnable, Transform> Warns => _warns;
 
-    public WarnsHandler(GameContentFactory factory)
+    public WarnsHandler(IFactory factory)
     {
         _factory = factory;
         _factory.WarnSpawned += AddToListWarn;

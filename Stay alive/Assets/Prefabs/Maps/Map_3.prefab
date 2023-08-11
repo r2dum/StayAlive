@@ -254,6 +254,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playButton: {fileID: 6410405511191242059}
+  _bombSprite: {fileID: 21300000, guid: dc6713bf29d12654ebcc509edae1d0f1, type: 3}
   _bombType: 0
   _color: {r: 0.47871673, g: 0.9150943, b: 0.6744749, a: 1}
 --- !u!1 &6068385031329621474

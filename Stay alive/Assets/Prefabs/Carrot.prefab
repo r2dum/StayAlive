@@ -80,6 +80,7 @@ MonoBehaviour:
   _speed: 9
   _disablePos: -3.8
   _particle: {fileID: 6691073170713797617, guid: 00ac61ccf4c54e648b48893d635b77bf, type: 3}
+  _animator: {fileID: 6963620325905545747}
   _type: 1
 --- !u!1 &7566089285342920753
 GameObject:
@@ -92,6 +93,7 @@ GameObject:
   - component: {fileID: 1708563418067178250}
   - component: {fileID: 4566973536291072576}
   - component: {fileID: 1028118263711534804}
+  - component: {fileID: 6963620325905545747}
   m_Layer: 0
   m_Name: default
   m_TagString: obstacle
@@ -106,14 +108,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7566089285342920753}
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2289584886930088530}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4566973536291072576
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -164,3 +166,23 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!95 &6963620325905545747
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7566089285342920753}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e853872969bddb74199dcb3690d5115e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0

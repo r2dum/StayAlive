@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class BonusesHandler : IPauseHandler
 {
-    private readonly GameContentFactory _factory;
+    private readonly IFactory _factory;
     
     private readonly Dictionary<ISpawnable, Transform> _bonuses = 
         new Dictionary<ISpawnable, Transform>();
     public IReadOnlyDictionary<ISpawnable, Transform> Bonuses => _bonuses;
     
-    public BonusesHandler(GameContentFactory factory)
+    public BonusesHandler(IFactory factory)
     {
         _factory = factory;
         _factory.BonusSpawned += AddToListBonus;
