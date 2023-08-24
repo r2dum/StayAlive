@@ -17,13 +17,15 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandle
     private IFactory _factory;
     private BombsHandler _bombsHandler;
     private BonusSpawner _bonusSpawner;
+    private CleanUpHandler _cleanUpHandler;
     
     private bool _isPaused;
     
-    public void Initialize(IFactory factory, BombsHandler bombsHandler)
+    public void Initialize(IFactory factory, BombsHandler bombsHandler, CleanUpHandler cleanUpHandler)
     {
         _factory = factory;
         _bombsHandler = bombsHandler;
+        _cleanUpHandler = cleanUpHandler;
         
         _allSpawnerStates = new List<BaseSpawnerState>()
         {
@@ -40,7 +42,7 @@ public class SpawnerStation : MonoBehaviour, IStationStateSwitcher, IPauseHandle
         };
         
         _bonusSpawner = new BonusSpawner(_factory, _bombsHandler, _spawnBonusPositions, _spawnBombPositions);
-        
+        _cleanUpHandler.AddToCleanList(_bonusSpawner);
         SwitchState<RandomSpawnerState>();
     }
 

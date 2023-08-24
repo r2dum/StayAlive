@@ -1,30 +1,30 @@
 ﻿using System.IO;
 using UnityEngine;
 
-public class JsonSaveSystem
+public class JsonSaveSystem : ISaveSystem
 { 
     private readonly string _filePath;
 
-    public JsonSaveSystem()
+    public JsonSaveSystem(string filePath)
     {
-        _filePath = Application.persistentDataPath + "/ShopData.json";
+        _filePath = Application.persistentDataPath + filePath;
     }
 
-    public void Save(ShopData shopData)
+    public void Save<T>(T data)
     {
-        string json = JsonUtility.ToJson(shopData);
+        string json = JsonUtility.ToJson(data);
         using (var writer = new StreamWriter(_filePath))
         {
             writer.WriteLine(json);
         }
     }
     
-    public ShopData Load(ShopData shopData)
+    public T Load<T>(T data)
     {
         if (File.Exists(_filePath) == false)
         {
-            Save(shopData);
-            return shopData;
+            Save(data);
+            return data;
         }
         
         string json = "";
@@ -37,6 +37,6 @@ public class JsonSaveSystem
             }
         }
         
-        return JsonUtility.FromJson<ShopData>(json);
+        return JsonUtility.FromJson<T>(json);
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +10,6 @@ public class GamePause : MonoBehaviour
     [SerializeField] private Button _pauseButton;
     [SerializeField] private Button _resumeButton;
     [SerializeField] private Text _pauseTimerText;
-    
-    private readonly WaitForSecondsRealtime _delay = 
-        new WaitForSecondsRealtime(1f);
     
     private PauseHandler _pauseHandler;
     
@@ -30,19 +27,14 @@ public class GamePause : MonoBehaviour
         SetPause(true);
     }
     
-    private void OnResumeButtonClicked()
-    {
-        StartCoroutine(ResumeWithTimer());
-    }
-    
-    private IEnumerator ResumeWithTimer()
+    private async void OnResumeButtonClicked()
     {
         _pausePanel.Hide();
         _pauseTimerText.enabled = true;
         for (int i = 3; i >= 1; i--)
         {
             _pauseTimerText.text = $"{i}";
-            yield return _delay;
+            await Task.Delay(1000);
         }
         _pauseTimerText.enabled = false;
         _pauseButton.gameObject.SetActive(true);

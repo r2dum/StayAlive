@@ -1,10 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class GameUIColor : MonoBehaviour
+public class GameUIColorChanger : MonoBehaviour
 {
     [SerializeField] private Image[] _images;
-
+    
     public void Initialize(Color color)
     {
         foreach (var image in _images)

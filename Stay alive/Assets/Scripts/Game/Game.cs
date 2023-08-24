@@ -4,44 +4,38 @@ public class Game : MonoBehaviour
 {
     [SerializeField] private Player[] _playerPrefabs;
     [SerializeField] private PlayerArmour _playerArmourPrefab;
-    [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private Map[] _mapPrefabs;
-    [SerializeField] private GameUIColor _gameUIColor;
-    [SerializeField] private ScoreImage[] _scoreImage;
-    [SerializeField] private GameLose _gameLose;
-    [SerializeField] private GamePause _gamePause;
     [SerializeField] private GameContentFactory _gameContentFactory;
     [SerializeField] private SpawnerStation _spawnerStation;
-    [SerializeField] private WalletSoundWithUIView _walletView;
-    [SerializeField] private CurrentScoreView _currentScoreView;
-    [SerializeField] private BestScoreView _bestScoreView;
-    [SerializeField] private PlayerArmourView _playerArmourView;
+    [SerializeField] private GameView _gameView;
+    [SerializeField] private GameLose _gameLose;
     [SerializeField] private Canvas _gameCanvas;
-    [SerializeField] private int _gameFps;
     
     private Player _player;
+    private PlayerInput _playerInput;
     private PlayerArmour _playerArmour;
     private Map _map;
     private ShopData _shopData;
+    private GameData _gameData;
     private Wallet _wallet;
     private CurrentScore _currentScore;
     private BestScore _bestScore;
+    private CleanUpHandler _cleanUpHandler;
     private BombsHandler _bombsHandler;
     private WarnsHandler _warnsHandler;
     private BonusesHandler _bonusesHandler;
     private PauseHandler _pauseHandler;
-    private JsonSaveSystem _jsonSaveSystem;
-    private PlayerPrefsSystem _playerPrefsSystem;
+    private ISaveSystem _shopSaveSystem;
+    private ISaveSystem _jsonGameSaveSystem;
     
-    public void Initialize(SceneLoader sceneLoader)
+    public void Initialize(GameData gameData, ISaveSystem saveSystem, PauseHandler pauseHandler, 
+        CleanUpHandler cleanUpHandler, SceneLoader sceneLoader)
     {
-        SetGameFps(_gameFps);
-        SaveSystems();
-        ShopData();
-        PauseHandler();
+        Handlers(pauseHandler, cleanUpHandler);
+        GameSaves(gameData, saveSystem);
         PlayerPrefab();
-        PlayerComponents();
         PlayerInput();
+        PlayerComponents();
         MapPrefab();
         CurrentScore();
         BestScore();
@@ -50,39 +44,33 @@ public class Game : MonoBehaviour
         WarnsHandler();
         BonusesHandler();
         SpawnerStation();
-        View(sceneLoader);
+        GameLose(sceneLoader);
+        GameView();
         SetPause(true);
     }
     
-    public void BeginGame()
+    public void BeginGame(bool animatedButton)
     {
-        _map.DestroyPlayButton();
+        _map.DestroyPlayButton(animatedButton);
         _spawnerStation.StartCurrentState();
         _gameCanvas.enabled = true;
         SetPause(false);
     }
     
-    private void SetGameFps(int fps)
+    private void Handlers(PauseHandler pauseHandler, CleanUpHandler cleanUpHandler)
     {
-        Application.targetFrameRate = fps;
+        _pauseHandler = pauseHandler;
+        _cleanUpHandler = cleanUpHandler;
     }
     
-    private void SaveSystems()
+    private void GameSaves(GameData gameData, ISaveSystem saveSystem)
     {
-        _jsonSaveSystem = new JsonSaveSystem();
-        _playerPrefsSystem = new PlayerPrefsSystem();
-    }
-    
-    private void ShopData()
-    {
+        _gameData = gameData;
+        _jsonGameSaveSystem = saveSystem;
+        
         _shopData = new ShopData();
-        _shopData = _jsonSaveSystem.Load(_shopData);
-    }
-    
-    private void PauseHandler()
-    {
-        _pauseHandler = new PauseHandler();
-        _gamePause.Initialize(_pauseHandler);
+        _shopSaveSystem = new JsonSaveSystem(Constants.SHOP_DATA_PATH);
+        _shopData = _shopSaveSystem.Load(_shopData);
     }
     
     private void SetPause(bool isPaused)
@@ -113,29 +101,29 @@ public class Game : MonoBehaviour
         }
     }
     
-    private void PlayerComponents()
-    {
-        _wallet = _player.GetComponent<Wallet>();
-        _wallet.Initialize(_playerPrefsSystem);
-        _playerArmour = Instantiate(_playerArmourPrefab, _player.transform, false);
-        _pauseHandler.AddToPauseList(_playerArmour);
-        _player.Initialize(_playerArmour);
-    }
-    
     private void PlayerInput()
     {
         if (SystemInfo.deviceType == DeviceType.Handheld)
         {
             var mobileInput = new MobileInput();
-            _playerInput.Initialize(_player, mobileInput);
+            _playerInput = new PlayerInput(_player, mobileInput);
         }
         else
         {
             var mouseInput = new MouseInput();
-            _playerInput.Initialize(_player, mouseInput);
+            _playerInput = new PlayerInput(_player, mouseInput);
         }
         
-        _pauseHandler.AddToPauseList(_playerInput);
+        _cleanUpHandler.AddToCleanList(_playerInput);
+    }
+    
+    private void PlayerComponents()
+    {
+        _wallet = _player.GetComponent<Wallet>();
+        _wallet.Initialize(_gameData);
+        _playerArmour = Instantiate(_playerArmourPrefab, _player.transform, false);
+        _pauseHandler.AddToPauseList(_playerArmour);
+        _player.Initialize(_playerInput, _playerArmour);
     }
     
     private void CurrentScore()
@@ -145,17 +133,17 @@ public class Game : MonoBehaviour
 
     private void BestScore()
     {
-        _bestScore = new BestScore(_currentScore, _playerPrefsSystem);
+        _bestScore = new BestScore(_currentScore, _gameData);
     }
     
     private void GameContentFactory()
     {
-        _gameContentFactory.Initialize(_map.BombType);
+        _gameContentFactory.Initialize(_gameData.BombType);
     }
     
     private void SpawnerStation()
     {
-        _spawnerStation.Initialize(_gameContentFactory, _bombsHandler);
+        _spawnerStation.Initialize(_gameContentFactory, _bombsHandler, _cleanUpHandler);
         _pauseHandler.AddToPauseList(_spawnerStation);
     }
     
@@ -163,33 +151,30 @@ public class Game : MonoBehaviour
     {
         _bombsHandler = new BombsHandler(_gameContentFactory);
         _pauseHandler.AddToPauseList(_bombsHandler);
+        _cleanUpHandler.AddToCleanList(_bombsHandler);
     }
     
     private void WarnsHandler()
     {
         _warnsHandler = new WarnsHandler(_gameContentFactory);
         _pauseHandler.AddToPauseList(_warnsHandler);
+        _cleanUpHandler.AddToCleanList(_warnsHandler);
     }
     
     private void BonusesHandler()
     {
         _bonusesHandler = new BonusesHandler(_gameContentFactory);
         _pauseHandler.AddToPauseList(_bonusesHandler);
+        _cleanUpHandler.AddToCleanList(_bonusesHandler);
     }
     
-    private void View(SceneLoader sceneLoader)
+    private void GameLose(SceneLoader sceneLoader)
     {
-        foreach (var scoreImage in _scoreImage)
-        {
-            scoreImage.Initialize(_map.BombSprite);
-        }
-        
-        _gameUIColor.Initialize(_map.Color);
-        _walletView.Initialize(_wallet);
-        _playerArmourView.Initialize(_playerArmour);
-        _currentScoreView.Initialize(_currentScore, _bombsHandler);
-        _bestScoreView.Initialize(_bestScore);
-        _gameLose.Initialize(_player, _wallet, _bestScore, 
-            _playerPrefsSystem, _currentScoreView, sceneLoader);
+        _gameLose.Initialize(_player, _wallet, _bestScore, _jsonGameSaveSystem, _gameData, sceneLoader);
+    }
+    
+    private void GameView()
+    {
+        _gameView.Initialize(_gameData.BombType, _wallet, _playerArmour, _currentScore, _bestScore, _bombsHandler); 
     }
 }

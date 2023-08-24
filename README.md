@@ -14,14 +14,16 @@
 
 ## It has been implemented
 
-+ Two entry points to the game: GameStartup(Initialises the Menu and Game) and Shop
++ Two entry points to the game: GameStartup and Shop
 + Pause the game without using Time.timeScale and Singleton
-+ Two SaveSystems: Json and PlayerPrefs
++ CleanUpHandler: got rid of destructor in C# classes, and their independent cleaning when changing scene
++ JasonSaveSystem: works with different files and classes (GameData, ShopData)
 + Object Pooling (Generic class)
-+ State Machine (Spawner)
++ State Machine (SpawnerStation)
 + Adherence to SOLID principles
 + Dependency Injection
 + Async scene loading
++ GameSettings
 + Extension Methods
 
 ## Patterns

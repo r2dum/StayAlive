@@ -10,11 +10,6 @@ public class PauseHandler : IPauseHandler
         _handlers.Add(handler);
     }
     
-    public void RemoveFromPauseList(IPauseHandler handler)
-    {
-        _handlers.Remove(handler);
-    }
-    
     public void SetPause(bool isPaused)
     {
         foreach (var handler in _handlers)

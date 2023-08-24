@@ -8,10 +8,10 @@ public class BestScore
 
     public event Action<int> Changed;
 
-    public BestScore(CurrentScore currentScore, PlayerPrefsSystem saveSystem)
+    public BestScore(CurrentScore currentScore, GameData gameData)
     {
         _currentScore = currentScore;
-        Amount = saveSystem.Load(Constants.RECORD);
+        Amount = gameData.BestScore;
     }
 
     public void TrySave()

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class WarnsHandler : IPauseHandler
+public class WarnsHandler : IPauseHandler, ICleanUp
 {
     private readonly IFactory _factory;
     
@@ -15,7 +15,7 @@ public class WarnsHandler : IPauseHandler
         _factory.WarnSpawned += AddToListWarn;
     }
     
-    ~WarnsHandler()
+    public void CleanUp()
     {
         _factory.WarnSpawned -= AddToListWarn;
     }

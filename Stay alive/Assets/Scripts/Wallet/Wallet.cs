@@ -3,17 +3,13 @@ using UnityEngine;
 
 public class Wallet : MonoBehaviour
 {
-    private PlayerPrefsSystem _playerPrefsSystem;
-    
     public int Coins { get; private set; }
     
     public event Action CoinsChanged;
     
-    public void Initialize(PlayerPrefsSystem playerPrefsSystem)
+    public void Initialize(GameData gameData)
     {
-        _playerPrefsSystem = playerPrefsSystem;
-        
-        Coins = _playerPrefsSystem.Load(Constants.CASH);
+        Coins = gameData.WalletCoins;
         CoinsChanged?.Invoke();
     }
     
@@ -26,7 +22,6 @@ public class Wallet : MonoBehaviour
     public void BuyForCoins(int price)
     { 
         Coins -= price;
-        _playerPrefsSystem.Save(Constants.CASH, Coins);
         CoinsChanged?.Invoke();
     }
 }

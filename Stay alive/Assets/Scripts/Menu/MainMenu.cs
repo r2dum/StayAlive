@@ -25,7 +25,7 @@ public class MainMenu : MonoBehaviour
     private void OnPlayGameButtonClicked()
     {
         Disable();
-        _game.BeginGame();
+        _game.BeginGame(true);
     }
     
     private async void OnShopButtonClicked()

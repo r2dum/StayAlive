@@ -123,9 +123,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playButton: {fileID: 978812018696388037}
-  _bombSprite: {fileID: 21300000, guid: dc6713bf29d12654ebcc509edae1d0f1, type: 3}
-  _bombType: 0
-  _color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &95729570592435680
 PrefabInstance:
   m_ObjectHideFlags: 0

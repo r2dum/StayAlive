@@ -6,6 +6,6 @@
         public const string SHOP = "Shop";
     }
     
-    public const string RECORD = "Record";
-    public const string CASH = "Cash";
+    public const string SHOP_DATA_PATH = "/ShopData.json";
+    public const string GAME_DATA_PATH = "/GameData.json";
 }

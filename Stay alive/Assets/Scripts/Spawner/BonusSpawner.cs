@@ -2,7 +2,7 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class BonusSpawner
+public class BonusSpawner : ICleanUp
 {
     private readonly Transform[] _spawnBonusPositions;
     private readonly Transform[] _spawnBombPositions;
@@ -21,7 +21,7 @@ public class BonusSpawner
         _bombsHandler.BombDisabled += Spawn;
     }
     
-    ~BonusSpawner()
+    public void CleanUp()
     {
         _bombsHandler.BombDisabled -= Spawn;
     }
@@ -33,7 +33,7 @@ public class BonusSpawner
         
         switch (chance)
         {
-            case <= 3:
+            case <= 2:
             {
                 _factory.Spawn(_spawnBonusPositions[position], GameContentType.Armour);
                 break;

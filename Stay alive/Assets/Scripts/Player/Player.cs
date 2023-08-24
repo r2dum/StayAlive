@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -25,13 +26,15 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
     private Vector3 _currentPosition;
     private Vector3 _targetPosition;
     
+    private PlayerInput _playerInput;
     private PlayerArmour _playerArmour;
     private Rigidbody _rigidbody;
 
     public event Action Died;
 
-    public void Initialize(PlayerArmour playerArmour)
+    public void Initialize(PlayerInput playerInput, PlayerArmour playerArmour)
     {
+        _playerInput = playerInput;
         _playerArmour = playerArmour;
         
         _rigidbody = GetComponent<Rigidbody>();
@@ -48,6 +51,8 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
         
         if (_isMove)
             MovePlayer();
+        
+        _playerInput.Update();
     }
     
     private void OnTriggerEnter(Collider trigger)
@@ -66,12 +71,17 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
         }
     }
     
-    public void Move(Vector3 distance)
+    public async void Move(Vector3 distance, Direction directionType)
     {
+        while (_isMove)
+        {
+            await Task.Delay(1);
+        }
+        
         var newPosition = _currentPosition + distance;
         
         if (Physics.CheckSphere(newPosition + new Vector3(0.0f, 0.5f, 0.0f), 0.1f) || 
-            _isMove || _isPaused || gameObject.activeInHierarchy == false) 
+            _isPaused || gameObject.activeInHierarchy == false) 
             return;
         
         _targetPosition = newPosition;
@@ -80,20 +90,22 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
         gameObject.transform.DOScale(new Vector3(1f, 0.85f, 1f), 0.25f);
         _jumpSound.Play();
         
-        switch (MoveDirection)
+        switch (directionType)
         {
             case Direction.North:
-                _mesh.DORotate(new Vector3(0, -90, 0), 0.1f);
+                _mesh.DORotate(new Vector3(0, -90, 0), 0.15f);
                 break;
             case Direction.South:
-                _mesh.DORotate(new Vector3(0, 90, 0), 0.1f);
+                _mesh.DORotate(new Vector3(0, 90, 0), 0.15f);
                 break;
             case Direction.East:
-                _mesh.DORotate(new Vector3(0, 180, 0), 0.1f);
+                _mesh.DORotate(new Vector3(0, 180, 0), 0.15f);
                 break;
             case Direction.West:
-                _mesh.DORotate(new Vector3(0, 0, 0), 0.1f);
+                _mesh.DORotate(new Vector3(0, 0, 0), 0.15f);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(directionType), directionType, null);
         }
     }
 
@@ -126,42 +138,9 @@ public class Player : MonoBehaviour, IMovable, IPauseHandler
     {
         return min + (max - min) * Mathf.Sin(weight * Mathf.PI);
     }
-
-    private Enum MoveDirection
-    {
-        get
-        {
-            if (_isMove)
-            {
-                var dx = _targetPosition.x - _currentPosition.x;
-                var dz = _targetPosition.z - _currentPosition.z;
-                
-                if (dz > 0)
-                    return Direction.North;
-                
-                else if (dz < 0)
-                    return Direction.South;
-                
-                else if (dx > 0)
-                    return Direction.West;
-                
-                else
-                    return Direction.East;
-            }
-            return null;
-        }
-    }
-
+    
     public void SetPause(bool isPaused)
     {
         _isPaused = isPaused;
     }
-}
-
-public enum Direction
-{
-    North,
-    South,
-    West,
-    East
 }

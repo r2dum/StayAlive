@@ -1,49 +1,39 @@
 ﻿using UnityEngine;
 
-public class PlayerInput : MonoBehaviour, IPauseHandler
+public class PlayerInput : ICleanUp
 {
-    private IMovable _movable;
-    private IInput _input;
-
-    private bool _isPaused;
-
-    public void Initialize(IMovable movable, IInput input)
+    private readonly IMovable _movable;
+    private readonly IInput _input;
+    
+    public PlayerInput(IMovable movable, IInput input)
     {
         _movable = movable;
         _input = input;
         _input.Swiped += OnSwiped;
     }
     
-    private void OnDisable()
+    public void CleanUp()
     {
         _input.Swiped -= OnSwiped;
     }
     
-    private void Update()
+    public void Update()
     {
-        if (_isPaused)
-            return;
-        
         _input.Update();
     }
 
     private void OnSwiped(SwipeType swipeType)
     {
         if (swipeType == SwipeType.Up)
-            _movable.Move(new Vector3(0, 0, 1.65f));
+            _movable.Move(new Vector3(0, 0, 1.65f), Direction.North);
         
         if (swipeType == SwipeType.Down)
-            _movable.Move(new Vector3(0, 0, -1.65f));
+            _movable.Move(new Vector3(0, 0, -1.65f), Direction.South);
         
         if (swipeType == SwipeType.Left)
-            _movable.Move(new Vector3(-1.65f, 0, 0));
+            _movable.Move(new Vector3(-1.65f, 0, 0), Direction.East);
         
         if (swipeType == SwipeType.Right)
-            _movable.Move(new Vector3(1.65f, 0, 0));
-    }
-
-    public void SetPause(bool isPaused)
-    {
-        _isPaused = isPaused;
+            _movable.Move(new Vector3(1.65f, 0, 0), Direction.West);
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BombsHandler : IPauseHandler
+public class BombsHandler : IPauseHandler, ICleanUp
 {
     private readonly IFactory _factory;
     
@@ -18,7 +18,7 @@ public class BombsHandler : IPauseHandler
         _factory.BombSpawned += AddToListBomb;
     }
     
-    ~BombsHandler()
+    public void CleanUp()
     {
         _factory.BombSpawned -= AddToListBomb;
     }

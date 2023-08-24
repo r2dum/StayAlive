@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class BonusesHandler : IPauseHandler
+public class BonusesHandler : IPauseHandler, ICleanUp
 {
     private readonly IFactory _factory;
     
@@ -15,7 +15,7 @@ public class BonusesHandler : IPauseHandler
         _factory.BonusSpawned += AddToListBonus;
     }
     
-    ~BonusesHandler()
+    public void CleanUp()
     {
         _factory.BonusSpawned -= AddToListBonus;
     }

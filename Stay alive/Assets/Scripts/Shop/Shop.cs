@@ -7,7 +7,7 @@ public class Shop : MonoBehaviour
 {
     [Header("Items")]
     [SerializeField] private ShopItem[] _playerSkins;
-    [SerializeField] private ShopItem[] _mapSkins;
+    [SerializeField] private ShopItemMap[] _mapSkins;
     
     [Header("Items Shop UI")]
     [SerializeField] private Button _arrowLeftButton;
@@ -21,7 +21,7 @@ public class Shop : MonoBehaviour
     [SerializeField] private Button _playersShopButton;
     [SerializeField] private Button _mapsShopButton;
     [SerializeField] private Button _exitShopButton;
-    [SerializeField] private GameUIColor _gameUIColor;
+    [SerializeField] private GameUIColorChanger _gameUIColorChanger;
     
     [SerializeField] private Vector3 _playerShopTarget;
     [SerializeField] private Vector3 _mapShopTarget;
@@ -31,8 +31,9 @@ public class Shop : MonoBehaviour
     [SerializeField] private WalletSoundWithUIView _walletView;
     
     private ShopData _shopData;
-    private JsonSaveSystem _jsonSaveSystem;
-    private PlayerPrefsSystem _playerPrefsSystem;
+    private GameData _gameData;
+    private ISaveSystem _shopSaveSystem;
+    private ISaveSystem _gameSaveSystem;
     private SceneLoader _sceneLoader;
     private Camera _camera;
     
@@ -41,14 +42,16 @@ public class Shop : MonoBehaviour
     
     private void Awake()
     {
-        _shopData = new ShopData();
-        _sceneLoader = new SceneLoader();
-        _jsonSaveSystem = new JsonSaveSystem();
-        _playerPrefsSystem = new PlayerPrefsSystem();
         _camera = Camera.main;
+        _shopData = new ShopData();
+        _gameData = new GameData();
+        _sceneLoader = new SceneLoader(new CleanUpHandler());
+        _shopSaveSystem = new JsonSaveSystem(Constants.SHOP_DATA_PATH);
+        _gameSaveSystem = new JsonSaveSystem(Constants.GAME_DATA_PATH);
         
-        _shopData = _jsonSaveSystem.Load(_shopData);
-        _wallet.Initialize(_playerPrefsSystem);
+        _shopData = _shopSaveSystem.Load(_shopData);
+        _gameData = _gameSaveSystem.Load(_gameData);
+        _wallet.Initialize(_gameData);
         _walletView.Initialize(_wallet);
         
         LoadItem(_shopData.CurrentPlayer, _playerSkins, ref _currentPlayerSkin);
@@ -58,7 +61,7 @@ public class Shop : MonoBehaviour
         GlobalCanvas();
     }
     
-    private void LoadItem(string dataSkin, ShopItem[] skins, ref int currentSkin)
+    private void LoadItem(string dataSkin, IReadOnlyList<ShopItem> skins, ref int currentSkin)
     {
         while (skins[currentSkin].name != dataSkin)
             currentSkin++;
@@ -119,7 +122,7 @@ public class Shop : MonoBehaviour
         _exitShopButton.onClick.AddListener(OnExitShopButtonClicked);
     }
     
-    private void CheckHaveItem(List<string> listDataSkins, ShopItem[] skins, int currentSkin)
+    private void CheckHaveItem(List<string> listDataSkins, IReadOnlyList<ShopItem> skins, int currentSkin)
     {
         foreach (var dataSkin in listDataSkins)
         {
@@ -138,9 +141,9 @@ public class Shop : MonoBehaviour
         _priceText.text = $"{skins[currentSkin].Price}";
     }
     
-    private void ArrowRight(List<string> listDataSkins, string dataSkin, ShopItem[] skins, ref int currentSkin)
+    private void ArrowRight(List<string> listDataSkins, string dataSkin, IReadOnlyList<ShopItem> skins, ref int currentSkin)
     {
-        if (currentSkin < skins.Length)
+        if (currentSkin < skins.Count)
         {
             if (currentSkin == 0)
                 _arrowLeftButton.gameObject.SetActive(true);
@@ -155,7 +158,7 @@ public class Shop : MonoBehaviour
             else if (dataSkin != skins[currentSkin].name)
                 CheckHaveItem(listDataSkins, skins, currentSkin);
 
-            if (currentSkin + 1 == skins.Length)
+            if (currentSkin + 1 == skins.Count)
                 _arrowRightButton.gameObject.SetActive(false);
         }
         
@@ -163,9 +166,9 @@ public class Shop : MonoBehaviour
             LoadUIColor();
     }
     
-    private void ArrowLeft(List<string> listDataSkins, string dataSkin, ShopItem[] skins, ref int currentSkin)
+    private void ArrowLeft(List<string> listDataSkins, string dataSkin, IReadOnlyList<ShopItem> skins, ref int currentSkin)
     {
-        if (currentSkin < skins.Length)
+        if (currentSkin < skins.Count)
         {
             skins[currentSkin].gameObject.SetActive(false);
             currentSkin--;
@@ -186,13 +189,20 @@ public class Shop : MonoBehaviour
             LoadUIColor();
     }
 
-    private void SelectItem(out string dataSkin, ShopItem[] skins, int currentSkin)
+    private void SelectItem(out string dataSkin, IReadOnlyList<ShopItem> skins, int currentSkin)
     {
         dataSkin = skins[currentSkin].name;
-        _jsonSaveSystem.Save(_shopData);
+        _shopSaveSystem.Save(_shopData);
 
         _selectButton.gameObject.SetActive(false);
         _selectedText.gameObject.SetActive(true);
+
+        if (skins == _mapSkins)
+        {
+            _gameData.UIColor = _mapSkins[_currentMapSkin].Color;
+            _gameData.BombType = _mapSkins[_currentMapSkin].BombType;
+            _gameSaveSystem.Save(_gameData);
+        }
     }
     
     private void ItemIsSelected()
@@ -202,14 +212,17 @@ public class Shop : MonoBehaviour
         _selectedText.gameObject.SetActive(true);
     }
     
-    private void TryBuyItem(List<string> listDataSkins, ShopItem[] skins, int currentSkin)
+    private void TryBuyItem(List<string> listDataSkins, IReadOnlyList<ShopItem> skins, int currentSkin)
     {
         if (_wallet.Coins < skins[currentSkin].Price) 
             return;
         
         _wallet.BuyForCoins(skins[currentSkin].Price);
+        _gameData.WalletCoins = _wallet.Coins;
         listDataSkins.Add(skins[currentSkin].name);
-        _jsonSaveSystem.Save(_shopData);
+        
+        _shopSaveSystem.Save(_shopData);
+        _gameSaveSystem.Save(_gameData);
         
         _buyButton.gameObject.SetActive(false);
         _selectButton.gameObject.SetActive(true);
@@ -240,7 +253,7 @@ public class Shop : MonoBehaviour
         _selectButton.onClick.RemoveAllListeners();
     }
     
-    private void LoadButtons(ShopItem[] skins, int currentSkin)
+    private void LoadButtons(IReadOnlyCollection<ShopItem> skins, int currentSkin)
     {
         if (currentSkin == 0)
             _arrowLeftButton.gameObject.SetActive(false);
@@ -251,14 +264,13 @@ public class Shop : MonoBehaviour
         if (currentSkin >= 0)
             _arrowRightButton.gameObject.SetActive(true);
 
-        if (currentSkin + 1 == skins.Length)
+        if (currentSkin + 1 == skins.Count)
             _arrowRightButton.gameObject.SetActive(false);
     }
     
     private void LoadUIColor()
     {
-        _mapSkins[_currentMapSkin].TryGetComponent(out Map map);
-        _gameUIColor.Initialize(map.Color);
+        _gameUIColorChanger.Initialize(_mapSkins[_currentMapSkin].Color);
         _playersShopButton.ChangeButtonAlpha(0.5f);
     }
     
